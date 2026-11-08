@@ -1,25 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-
-  <groupId>org.example</groupId>
-  <artifactId>Clinica-app</artifactId>
-  <version>1.0-SNAPSHOT</version>
-  <packaging>jar</packaging>
-
-  <name>Clinica-app</name>
-  <url>http://maven.apache.org</url>
-
+  <groupId>co.ufps.clinica</groupId><artifactId>clinica-backend</artifactId><version>1.0-SNAPSHOT</version><packaging>pom</packaging>
+  <name>Clinica Backend</name>
+  <modules><module>clinica-domain</module><module>clinica-application</module><module>clinica-infrastructure</module><module>clinica-api</module></modules>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.release>17</maven.compiler.release>
+    <maven.compiler.source>17</maven.compiler.source>
+    <maven.compiler.target>17</maven.compiler.target>
+    <quarkus.platform.version>3.8.2</quarkus.platform.version>
   </properties>
-
-  <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.1</version>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
+  <dependencyManagement><dependencies>
+    <dependency><groupId>io.quarkus.platform</groupId><artifactId>quarkus-bom</artifactId><version>${quarkus.platform.version}</version><type>pom</type><scope>import</scope></dependency>
+  </dependencies></dependencyManagement>
+  <build><pluginManagement><plugins>
+    <plugin><artifactId>maven-compiler-plugin</artifactId><version>3.12.1</version><configuration><release>17</release><parameters>true</parameters></configuration></plugin>
+    <plugin><groupId>io.quarkus.platform</groupId><artifactId>quarkus-maven-plugin</artifactId><version>${quarkus.platform.version}</version></plugin>
+  </plugins></pluginManagement></build>
 </project>
