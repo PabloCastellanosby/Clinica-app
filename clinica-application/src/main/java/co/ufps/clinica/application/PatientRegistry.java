@@ -10,7 +10,8 @@ import java.util.*;
 public final class PatientRegistry {
     private final PatientRepository repository;
     public PatientRegistry(PatientRepository repository) { this.repository = Objects.requireNonNull(repository); }
-    public Patient register(Patient patient) {
+    public Patient register(RegisterPatientCommand command) {
+        Patient patient = Patient.register(command.documentType(), command.documentNumber(), command.firstName(), command.lastName(), command.birthDate(), command.email(), command.phone(), command.address(), command.affiliationType());
         if (patient.documentNumber() == null || patient.documentNumber().isBlank()) throw new IllegalArgumentException("El documento es obligatorio");
         if (repository.findByDocument(patient.documentType(), patient.documentNumber()).isPresent()) throw new PatientAlreadyExistsException(patient.documentNumber());
         return repository.save(patient);

@@ -3,6 +3,8 @@ package co.ufps.clinica.application;
 import co.ufps.clinica.domain.ClinicModel.*;
 import co.ufps.clinica.domain.Role;
 import co.ufps.clinica.domain.UserRepository;
+import co.ufps.clinica.domain.UserId;
+import co.ufps.clinica.domain.AccessAuditId;
 import java.time.Instant;
 import java.util.*;
 
@@ -22,12 +24,12 @@ public final class AccountService {
     private User create(String email, String password, Role role) {
         if (email == null || email.isBlank() || password == null || password.length() < 10) throw new IllegalArgumentException("Email obligatorio y contraseña de al menos 10 caracteres");
         if (repository.findByEmail(email.trim().toLowerCase(Locale.ROOT)).isPresent()) throw new IllegalArgumentException("El correo ya está registrado");
-        return repository.save(new User(UUID.randomUUID(), email.trim().toLowerCase(Locale.ROOT), passwords.hash(password), role, true, Instant.now(), null));
+        return repository.save(new User(UserId.generate(), email.trim().toLowerCase(Locale.ROOT), passwords.hash(password), role, true, Instant.now(), null));
     }
     public User authenticate(String email, String password, String ipAddress) {
         User found = repository.findByEmail(email.trim().toLowerCase(Locale.ROOT)).orElse(null);
         boolean accepted = found != null && found.active() && passwords.matches(password, found.passwordHash());
-        repository.saveAudit(new AccessAudit(UUID.randomUUID(), found == null ? null : found.id(), "LOGIN", ipAddress, Instant.now(), accepted));
+        repository.saveAudit(new AccessAudit(AccessAuditId.generate(), found == null ? null : found.id(), "LOGIN", ipAddress, Instant.now(), accepted));
         if (!accepted) throw new SecurityException("Credenciales inválidas");
         return repository.save(new User(found.id(), found.email(), found.passwordHash(), found.role(), true, found.createdAt(), Instant.now()));
     }
