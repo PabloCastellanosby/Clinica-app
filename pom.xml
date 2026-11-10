@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>co.ufps.clinica</groupId><artifactId>clinica-backend</artifactId><version>1.0-SNAPSHOT</version><packaging>pom</packaging>
   <name>Clinica Backend</name>
-  <modules><module>clinica-domain</module><module>clinica-application</module><module>clinica-infrastructure</module><module>clinica-api</module></modules>
+  <modules><module>clinica-entities</module><module>clinica-usecases</module><module>clinica-interface-adapters</module><module>clinica-frameworks-drivers</module><module>clinica-api</module></modules>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.release>17</maven.compiler.release>

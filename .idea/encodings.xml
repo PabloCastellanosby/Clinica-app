@@ -7,8 +7,16 @@
     <file url="file://$PROJECT_DIR$/clinica-application/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/clinica-domain/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/clinica-domain/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/clinica-entities/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/clinica-entities/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/clinica-frameworks-drivers/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/clinica-frameworks-drivers/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/clinica-infrastructure/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/clinica-infrastructure/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/clinica-interface-adapters/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/clinica-interface-adapters/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/clinica-usecases/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/clinica-usecases/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/resources" charset="UTF-8" />
   </component>
