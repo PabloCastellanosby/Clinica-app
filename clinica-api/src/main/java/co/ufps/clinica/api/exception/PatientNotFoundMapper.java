@@ -1,6 +1,6 @@
 package co.ufps.clinica.api.exception;
 
-import co.ufps.clinica.application.exception.PatientNotFoundException;
+import co.ufps.clinica.application.patient.PatientNotFoundException;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;

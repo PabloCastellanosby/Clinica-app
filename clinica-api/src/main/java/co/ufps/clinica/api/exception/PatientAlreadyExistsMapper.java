@@ -1,6 +1,6 @@
 package co.ufps.clinica.api.exception;
 
-import co.ufps.clinica.domain.exception.PatientAlreadyExistsException;
+import co.ufps.clinica.domain.patient.PatientAlreadyExistsException;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
