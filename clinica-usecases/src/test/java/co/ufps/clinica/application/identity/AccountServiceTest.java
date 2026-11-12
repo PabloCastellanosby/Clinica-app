@@ -16,9 +16,49 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
 
 class AccountServiceTest {
+    @Test void patientAccountRegistrationNormalizesDocumentLikePatientRegistry() {
+        Patient existing = Patient.register("CC", "AB-123", "Ana", "Pérez", null,
+                "ana@example.test", null, null, null);
+        AtomicReference<String> lookup = new AtomicReference<>();
+        AtomicReference<Patient> linked = new AtomicReference<>();
+        PatientRepository patients = new PatientRepository() {
+            public Optional<Patient> findByDocument(String type, String number) {
+                lookup.set(type + ":" + number);
+                return "CC:AB-123".equals(lookup.get()) ? Optional.of(existing) : Optional.empty();
+            }
+            public Optional<Patient> findById(PatientId id) { return Optional.empty(); }
+            public Optional<Patient> findByUserId(UserId id) { return Optional.empty(); }
+            public Patient save(Patient patient) { return patient; }
+            public List<Patient> search(String query) { return List.of(); }
+        };
+        UserRepository users = new UserRepository() {
+            public Optional<User> findByEmail(String email) { return Optional.empty(); }
+            public Optional<User> findById(UserId id) { return Optional.empty(); }
+            public User save(User user) { return user; }
+            public User saveAndRevokeSessions(User user, Instant revokedAt) { return user; }
+            public User registerPatientAccount(User user, Patient patient) { linked.set(patient); return user; }
+            public void savePasswordReset(co.ufps.clinica.domain.identity.PasswordReset reset) {}
+            public Optional<co.ufps.clinica.domain.identity.PasswordReset> findPasswordReset(String hash) { return Optional.empty(); }
+            public void consumePasswordReset(co.ufps.clinica.domain.identity.PasswordReset reset, User user) {}
+            public void saveAudit(co.ufps.clinica.domain.identity.AccessAudit audit) {}
+            public co.ufps.clinica.domain.identity.UserSession saveSession(co.ufps.clinica.domain.identity.UserSession session) { return session; }
+            public Optional<co.ufps.clinica.domain.identity.UserSession> findSessionByTokenHash(String hash) { return Optional.empty(); }
+        };
+
+        AccountService service = new AccountService(users, patients, new TestPasswords());
+        User registered = service.registerPatient(" ANA@example.test ", "long-password-123", " cc ", " ab-123 ");
+
+        assertEquals("CC:AB-123", lookup.get());
+        assertEquals("ana@example.test", linked.get().email());
+        assertEquals("CC", linked.get().documentType());
+        assertEquals("AB-123", linked.get().documentNumber());
+        assertEquals(registered.id(), linked.get().accountUserId());
+    }
+
     @Test void administratorCanDeactivateAndChangeStaffRoleButCannotDisableSelf() {
         User administrator = user(Role.ADMINISTRADOR);
         User receptionist = user(Role.RECEPCION);

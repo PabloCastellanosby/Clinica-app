@@ -5,7 +5,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Table(name = "stock_movements")
+@Table(name = "STOCK_MOVEMENTS")
 public class StockMovementJpa {
     @Id @Column(name = "id", nullable = false, updatable = false)
     private UUID id;

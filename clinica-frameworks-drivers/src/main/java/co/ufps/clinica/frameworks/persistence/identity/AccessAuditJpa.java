@@ -9,7 +9,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Table(name = "access_audit", indexes = @Index(name = "idx_access_audit_user_time", columnList = "user_id, occurred_at"))
+@Table(name = "ACCESS_AUDIT", indexes = @Index(name = "idx_access_audit_user_time", columnList = "user_id, occurred_at"))
 public class AccessAuditJpa {
     @Id @Column(name = "id", nullable = false, updatable = false)
     private UUID id;

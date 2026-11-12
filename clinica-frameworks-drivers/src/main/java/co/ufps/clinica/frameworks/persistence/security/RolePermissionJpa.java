@@ -7,7 +7,7 @@ import jakarta.persistence.IdClass;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "role_permissions")
+@Table(name = "ROLE_PERMISSIONS")
 @IdClass(RolePermissionJpaId.class)
 public class RolePermissionJpa {
     @Id @Column(name = "role_name", nullable = false, length = 40)

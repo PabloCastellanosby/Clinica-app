@@ -11,7 +11,7 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
-@Table(name = "patients",
+@Table(name = "PATIENTS",
        uniqueConstraints = @UniqueConstraint(name = "uq_patient_document", columnNames = {"document_type", "document_number"}),
        indexes = @Index(name = "idx_patient_name", columnList = "last_name, first_name"))
 public class PatientJpa {

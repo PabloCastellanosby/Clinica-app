@@ -28,8 +28,12 @@ public class ReportQueriesJpa implements ReportQueries {
         report.put("until", until.toString());
         String filter = branchId == null ? "1 = 1" : "a.branchId = :branchId";
         addMetrics(report, filter, branchId == null ? null : branchId.value(), null, from, until);
-        report.put("activeDoctors", entityManager.createQuery("SELECT COUNT(d) FROM DoctorJpa d WHERE d.status = 'ACTIVE' "
-                + "AND EXISTS (SELECT u.id FROM UserJpa u WHERE u.id = d.userId AND u.active = true)", Long.class).getSingleResult());
+        String activeDoctorsQuery = "SELECT COUNT(DISTINCT d) FROM DoctorJpa d WHERE d.status = 'ACTIVE' "
+                + "AND EXISTS (SELECT u.id FROM UserJpa u WHERE u.id = d.userId AND u.active = true)"
+                + (branchId == null ? "" : " AND EXISTS (SELECT av.id FROM DoctorAvailabilityJpa av WHERE av.doctorId = d.id AND av.branchId = :branchId)");
+        var doctorsQuery = entityManager.createQuery(activeDoctorsQuery, Long.class);
+        if (branchId != null) doctorsQuery.setParameter("branchId", branchId.value());
+        report.put("activeDoctors", doctorsQuery.getSingleResult());
         return report;
     }
 

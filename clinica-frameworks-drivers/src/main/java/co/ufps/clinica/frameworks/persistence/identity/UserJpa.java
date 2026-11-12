@@ -8,7 +8,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Table(name = "users")
+@Table(name = "USERS")
 public class UserJpa {
     @Id @Column(name = "id", nullable = false, updatable = false)
     private UUID id;

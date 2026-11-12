@@ -6,7 +6,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Table(name = "encounters", indexes = @Index(name = "idx_encounter_patient", columnList = "patient_id"),
+@Table(name = "ENCOUNTERS", indexes = @Index(name = "idx_encounter_patient", columnList = "patient_id"),
        uniqueConstraints = @UniqueConstraint(name = "uq_encounter_appointment", columnNames = "appointment_id"))
 public class EncounterJpa {
     @Id @Column(name = "id", nullable = false, updatable = false)

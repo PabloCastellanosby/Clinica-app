@@ -46,11 +46,24 @@ public final class CommunicationService implements NotificationGateway {
     }
 
     @Override
-    public void sendAppointmentConfirmation(Appointment appointment) {
+    public void sendAppointmentRequestReceived(Appointment appointment) {
         var patient = patients.findById(appointment.patientId()).orElse(null);
         TransactionalMessage message = new TransactionalMessage(TransactionalMessageId.generate(),
-                patient == null ? null : patient.accountUserId(), patient == null ? "" : patient.email(), "Confirmación de cita",
-                "Su cita clínica está confirmada para " + appointment.startsAt() + ".", MessageStatus.PENDING, Instant.now(), null);
+                patient == null ? null : patient.accountUserId(), patient == null ? "" : patient.email(), "Solicitud de cita recibida",
+                "Recibimos su solicitud de cita para " + appointment.startsAt()
+                        + ". Le notificaremos cuando sea confirmada por la clínica.",
+                MessageStatus.PENDING, Instant.now(), null);
+        repository.saveMessage(message);
+        dispatchPending(1);
+    }
+
+    @Override
+    public void sendAppointmentConfirmed(Appointment appointment) {
+        var patient = patients.findById(appointment.patientId()).orElse(null);
+        TransactionalMessage message = new TransactionalMessage(TransactionalMessageId.generate(),
+                patient == null ? null : patient.accountUserId(), patient == null ? "" : patient.email(), "Cita confirmada",
+                "La clínica confirmó su cita para " + appointment.startsAt() + ".",
+                MessageStatus.PENDING, Instant.now(), null);
         repository.saveMessage(message);
         dispatchPending(1);
     }
@@ -63,7 +76,7 @@ public final class CommunicationService implements NotificationGateway {
                 "Le recordamos su cita clínica programada para " + appointment.startsAt() + ".", MessageStatus.PENDING, Instant.now(), null);
         repository.saveMessage(message);
         dispatchPending(1);
-        return repository.findById(message.id()).map(m -> m.status() == MessageStatus.SENT).orElse(false);
+        return repository.findById(message.id()).map(m -> m.status() != MessageStatus.FAILED).orElse(true);
     }
 
     @Override

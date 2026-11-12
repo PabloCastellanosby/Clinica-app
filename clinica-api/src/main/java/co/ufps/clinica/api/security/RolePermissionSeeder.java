@@ -17,6 +17,7 @@ import co.ufps.clinica.application.port.out.security.RolePermissionRepository;
 import co.ufps.clinica.domain.identity.Role;
 import co.ufps.clinica.domain.security.Permission;
 import co.ufps.clinica.domain.security.PermissionId;
+import co.ufps.clinica.domain.security.RolePermissionGrant;
 import io.quarkus.runtime.StartupEvent;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
@@ -35,6 +36,7 @@ public class RolePermissionSeeder {
 
     @Transactional
     void seed(@Observes StartupEvent event) {
+        List<RolePermissionGrant> defaults = new java.util.ArrayList<>();
         for (Class<?> resource : RESOURCES) {
             RequireRoles classPolicy = resource.getAnnotation(RequireRoles.class);
             for (var method : resource.getDeclaredMethods()) {
@@ -47,9 +49,10 @@ public class RolePermissionSeeder {
                         resource.getSimpleName() + " · " + method.getName());
                 for (Role role : Role.values()) {
                     boolean initiallyAllowed = List.of(policy.value()).contains(role);
-                    repository.ensureDefault(permission, role, initiallyAllowed);
+                    defaults.add(new RolePermissionGrant(role, permission, initiallyAllowed));
                 }
             }
         }
+        repository.ensureDefaults(defaults);
     }
 }

@@ -32,7 +32,7 @@ public class IdentityResource {
         return controller.login(request, remoteAddress == null ? null : remoteAddress.hostAddress());
     }
 
-    @POST @Path("/logout")
+    @POST @Path("/logout") @RequireRoles({Role.ADMINISTRADOR, Role.RECEPCION, Role.MEDICO, Role.PACIENTE, Role.FARMACIA})
     public Response logout(@Context HttpHeaders headers) {
         String authorization = headers.getHeaderString(HttpHeaders.AUTHORIZATION);
         String token = authorization != null && authorization.regionMatches(true, 0, "Bearer ", 0, 7)

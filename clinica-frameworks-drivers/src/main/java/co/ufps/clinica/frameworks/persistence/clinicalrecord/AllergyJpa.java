@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import java.util.UUID;
 
 @Entity
-@Table(name = "allergies", indexes = @Index(name = "idx_allergy_patient", columnList = "patient_id"))
+@Table(name = "ALLERGIES", indexes = @Index(name = "idx_allergy_patient", columnList = "patient_id"))
 public class AllergyJpa {
     @Id @Column(name = "id", nullable = false, updatable = false)
     private UUID id;

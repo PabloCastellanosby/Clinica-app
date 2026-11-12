@@ -8,7 +8,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Table(name = "password_resets")
+@Table(name = "PASSWORD_RESETS")
 public class PasswordResetJpa {
     @Id @Column(name = "id", nullable = false, updatable = false)
     private UUID id;

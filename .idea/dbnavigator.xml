@@ -5,7 +5,12 @@
     <preferences />
   </component>
   <component name="DBNavigator.Project.DatabaseAssistantManager">
-    <assistants />
+    <assistants>
+      <assistant-state connection-id="07fa2b91-aa4e-4ad6-ad11-d8bd8b95ae68" assistant-type="PUBLIC" default-profile-name="" selected-chat-id="" availability="AVAILABLE" acknowledgement="NONE" selected="true">
+        <tools />
+        <mcp-servers />
+      </assistant-state>
+    </assistants>
     <selection-state>
       <model-selection />
     </selection-state>
@@ -27,7 +32,12 @@
     <filters />
   </component>
   <component name="DBNavigator.Project.Settings">
-    <states />
+    <states>
+      <state category="SECRET_STORAGE_MIGRATION">
+        <cleaned value="true" />
+        <migrated value="true" />
+      </state>
+    </states>
     <connections>
       <connection source-id="" id="07fa2b91-aa4e-4ad6-ad11-d8bd8b95ae68" active="true" signed="true">
         <database>
@@ -35,7 +45,7 @@
           <description value="Base de datos en AWS en MariaDB para su uso en este backend" />
           <database-type value="MYSQL" />
           <config-type value="CUSTOM" />
-          <database-version value="9999.0" />
+          <database-version value="5.5" />
           <driver-source value="BUNDLED" />
           <driver-library value="" />
           <driver value="" />
@@ -59,7 +69,7 @@
           <azure-token-tenant-id value="" />
           <azure-token-client-id value="" />
           <azure-token-client-certificate-file value="" />
-          <session-user value="" />
+          <session-user value="test@201.221.178.92" />
         </database>
         <properties>
           <auto-commit value="false" />

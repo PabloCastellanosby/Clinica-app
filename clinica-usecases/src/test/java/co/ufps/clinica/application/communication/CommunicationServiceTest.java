@@ -5,9 +5,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import co.ufps.clinica.application.port.out.communication.CommunicationRepository;
 import co.ufps.clinica.application.port.out.patient.PatientRepository;
+import co.ufps.clinica.domain.appointment.Appointment;
 import co.ufps.clinica.domain.communication.MessageStatus;
 import co.ufps.clinica.domain.communication.TransactionalMessage;
 import co.ufps.clinica.domain.communication.TransactionalMessageId;
+import co.ufps.clinica.domain.clinic.BranchId;
+import co.ufps.clinica.domain.clinic.OfficeId;
+import co.ufps.clinica.domain.patient.Patient;
+import co.ufps.clinica.domain.staff.DoctorId;
 import java.lang.reflect.Proxy;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -48,16 +53,59 @@ class CommunicationServiceTest {
         assertEquals(0, service.dispatchPending(10));
     }
 
+    @Test void reminderIsAcceptedByTheOutboxSoTheAppointmentJobDoesNotCreateDuplicateRetries() {
+        var repository = new InMemoryCommunicationRepository();
+        Patient patient = Patient.register("CC", "7788", "Laura", "Pérez", null,
+                "patient@example.test", null, null, null);
+        PatientRepository patients = proxy(PatientRepository.class, (method, args) ->
+                method.equals("findById") ? Optional.of(patient) : Optional.empty());
+        var service = new CommunicationService(repository,
+                (recipient, subject, body) -> { throw new IllegalStateException("SMTP unavailable"); }, patients);
+        Instant startsAt = Instant.now().plusSeconds(3600);
+        Appointment appointment = Appointment.schedule(patient.id(), DoctorId.generate(), BranchId.generate(),
+                OfficeId.generate(), null, startsAt, startsAt.plusSeconds(1800), Instant.now());
+
+        assertTrue(service.sendReminder(appointment));
+        assertEquals(1, repository.messages.size());
+        assertEquals(MessageStatus.PENDING, repository.messages.get(0).status());
+        assertEquals(1, repository.messages.get(0).attempts());
+    }
+
+    @Test void confirmedAppointmentQueuesAConfirmationMessageForItsPatient() {
+        var repository = new InMemoryCommunicationRepository();
+        Patient patient = Patient.register("CC", "9911", "Marta", "López", null,
+                "marta@example.test", null, null, null);
+        PatientRepository patients = proxy(PatientRepository.class, (method, args) ->
+                method.equals("findById") ? Optional.of(patient) : Optional.empty());
+        var service = new CommunicationService(repository, (recipient, subject, body) -> { }, patients);
+        Instant startsAt = Instant.now().plusSeconds(7200);
+        Appointment appointment = Appointment.schedule(patient.id(), DoctorId.generate(), BranchId.generate(),
+                OfficeId.generate(), null, startsAt, startsAt.plusSeconds(1800), Instant.now());
+
+        service.sendAppointmentConfirmed(appointment);
+
+        assertEquals(1, repository.messages.size());
+        assertEquals("marta@example.test", repository.messages.get(0).destination());
+        assertEquals("Cita confirmada", repository.messages.get(0).subject());
+        assertTrue(repository.messages.get(0).template().contains("La clínica confirmó su cita"));
+        assertEquals(MessageStatus.SENT, repository.messages.get(0).status());
+    }
+
     private CommunicationService service(CommunicationRepository repository,
             co.ufps.clinica.application.port.out.communication.EmailGateway emailGateway) {
         PatientRepository patients = proxy(PatientRepository.class);
         return new CommunicationService(repository, emailGateway, patients);
     }
 
+    private interface Invocation { Object call(String method, Object[] args); }
     @SuppressWarnings("unchecked")
     private <T> T proxy(Class<T> type) {
+        return proxy(type, (method, args) -> Optional.empty());
+    }
+    @SuppressWarnings("unchecked")
+    private <T> T proxy(Class<T> type, Invocation invocation) {
         return (T) Proxy.newProxyInstance(type.getClassLoader(), new Class<?>[] {type},
-                (proxy, method, args) -> Optional.empty());
+                (proxy, method, args) -> invocation.call(method.getName(), args));
     }
 
     private static final class InMemoryCommunicationRepository implements CommunicationRepository {

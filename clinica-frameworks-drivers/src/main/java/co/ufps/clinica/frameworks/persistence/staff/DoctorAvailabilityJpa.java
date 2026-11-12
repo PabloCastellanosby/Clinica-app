@@ -7,7 +7,7 @@ import java.time.LocalTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "doctor_availability")
+@Table(name = "DOCTOR_AVAILABILITY")
 public class DoctorAvailabilityJpa {
     @Id @Column(name = "id", nullable = false, updatable = false)
     private UUID id;

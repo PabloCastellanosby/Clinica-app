@@ -5,7 +5,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Table(name = "prescriptions", indexes = @Index(name = "idx_prescription_encounter", columnList = "encounter_id"))
+@Table(name = "PRESCRIPTIONS", indexes = @Index(name = "idx_prescription_encounter", columnList = "encounter_id"))
 public class PrescriptionJpa {
     @Id @Column(name = "id", nullable = false, updatable = false)
     private UUID id;

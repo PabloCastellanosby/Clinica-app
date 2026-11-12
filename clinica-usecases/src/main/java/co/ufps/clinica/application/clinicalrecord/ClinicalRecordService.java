@@ -52,6 +52,8 @@ public final class ClinicalRecordService {
     }
 
     public VitalSigns recordVitalSigns(VitalSignsRecordCommand command, UserId actorId, Role role) {
+        if (command == null || command.encounterId() == null)
+            throw new IllegalArgumentException("Los signos vitales deben indicar el encuentro clínico");
         requireWritableEncounter(command.encounterId(), actorId, role);
         VitalSigns vitalSigns = new VitalSigns(VitalSignsId.generate(), command.encounterId(),
                 command.temperatureC(), command.systolic(), command.diastolic(), command.heartRate(),
@@ -60,6 +62,9 @@ public final class ClinicalRecordService {
     }
 
     public Prescription issuePrescription(IssuePrescriptionCommand command, UserId actorId, Role role) {
+        if (command == null || command.encounterId() == null || command.patientId() == null
+                || command.doctorId() == null || command.lines() == null || command.lines().isEmpty())
+            throw new IllegalArgumentException("La receta debe incluir encuentro, paciente, médico y medicamentos");
         Encounter encounter = requireWritableEncounter(command.encounterId(), actorId, role);
         if (!encounter.patientId().equals(command.patientId()) || !encounter.doctorId().equals(command.doctorId()))
             throw new SecurityException("El paciente o médico de la receta no coincide con el encuentro");
@@ -93,6 +98,8 @@ public final class ClinicalRecordService {
     }
 
     public Allergy registerAllergy(RegisterAllergyCommand command, UserId actorId, Role role) {
+        if (command == null || command.patientId() == null)
+            throw new IllegalArgumentException("La alergia debe indicar el paciente");
         authorizeClinicalPatient(command.patientId(), actorId, role);
         Allergy allergy = new Allergy(AllergyId.generate(), command.patientId(),
                 command.substance(), command.reaction(), command.severity());
@@ -105,6 +112,8 @@ public final class ClinicalRecordService {
     }
 
     public MedicalHistory addMedicalHistory(AddMedicalHistoryCommand command, UserId actorId, Role role) {
+        if (command == null || command.patientId() == null || actorId == null)
+            throw new IllegalArgumentException("El antecedente debe indicar paciente y responsable");
         authorizeClinicalPatient(command.patientId(), actorId, role);
         MedicalHistory history = new MedicalHistory(MedicalHistoryId.generate(), command.patientId(),
                 command.type(), command.description(), Instant.now(), actorId);

@@ -1,4 +1,6 @@
 target/
+.maven-temp-repository/
+.maven-temp-settings.xml
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/

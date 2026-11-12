@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import java.util.UUID;
 
 @Entity
-@Table(name = "offices", indexes = @Index(name = "idx_office_branch", columnList = "branch_id"))
+@Table(name = "OFFICES", indexes = @Index(name = "idx_office_branch", columnList = "branch_id"))
 public class OfficeJpa {
     @Id @Column(name = "id", nullable = false, updatable = false)
     private UUID id;

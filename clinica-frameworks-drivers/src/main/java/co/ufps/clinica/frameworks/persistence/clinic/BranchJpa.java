@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import java.util.UUID;
 
 @Entity
-@Table(name = "branches", indexes = @Index(name = "idx_branch_clinic", columnList = "clinic_id"))
+@Table(name = "BRANCHES", indexes = @Index(name = "idx_branch_clinic", columnList = "clinic_id"))
 public class BranchJpa {
     @Id @Column(name = "id", nullable = false, updatable = false)
     private UUID id;

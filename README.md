@@ -1,6 +1,6 @@
 # Backend de Clínica
 
-Backend Maven multimódulo en Java 17 y Quarkus, organizado con Clean Architecture. Las dependencias apuntan hacia el centro: Entities no depende de otros módulos; Use Cases depende de Entities; Interface Adapters y Frameworks & Drivers dependen de Use Cases; API ensambla los módulos y expone REST.
+Backend Maven multimódulo con Java 17 como nivel de compilación y Quarkus, organizado con Clean Architecture. Las dependencias apuntan hacia el centro: Entities no depende de otros módulos; Use Cases depende de Entities; Interface Adapters y Frameworks & Drivers dependen de Use Cases; API ensambla los módulos y expone REST.
 
 ```text
 clinica-entities/             entidades y reglas de negocio
@@ -12,7 +12,7 @@ clinica-api/                  endpoints REST, autorización y composición
 
 ## Construcción y ejecución
 
-Se requiere Maven y JDK 17 o 21. El `maven.compiler.release` del proyecto es 17.
+Se requiere Maven y JDK 17, 21 o 25. El `maven.compiler.release` del proyecto es 17.
 
 ```powershell
 mvn clean test
@@ -35,6 +35,8 @@ El bootstrap crea la cuenta si no existe y verifica que la cuenta configurada se
 
 H2 se usa de forma predeterminada para desarrollo y guarda los datos en `./data/clinica`. La persistencia real del proyecto es MariaDB; configura `CLINICA_DB_KIND=mariadb`, `CLINICA_DB_URL=jdbc:mariadb://host:3306/clinica`, `CLINICA_DB_USERNAME` y `CLINICA_DB_PASSWORD` para conectarla.
 
+El BOM de Quarkus 3.8.2 administraba Byte Buddy 1.14.11, anterior al soporte de archivos de clase de Java 25. El POM raíz fija `net.bytebuddy:byte-buddy` en 1.18.16 mediante `dependencyManagement`, de modo que el override aplica al módulo de persistencia sin acoplar esa dependencia al dominio ni a los casos de uso. También alinea todos los módulos Netty en 4.1.138.Final para mantener sus correcciones recientes dentro de la rama 4.1. En Java 25, Netty aún emite un aviso de `sun.misc.Unsafe::allocateMemory`; el proyecto arranca correctamente y el aviso proviene del uso de memoria nativa en la versión actual de Netty.
+
 Flyway aplica las migraciones versionadas al iniciar la API. Hay scripts para H2 y MariaDB bajo `clinica-api/src/main/resources/db/migration`; V1 crea 32 tablas, V2 agrega 44 claves foráneas, V3 impide registrar más de un encuentro clínico por cita, V4 exige especialidad para médicos y servicios, V5 crea el catálogo de permisos y las asignaciones por rol, V6 añade el control de intentos de entrega, V7 la marca temporal para recuperar envíos interrumpidos y V8 impide asociar más de una factura a la misma cita. Hibernate valida el esquema migrado y no lo altera automáticamente. Los esquemas existentes se baselinen en la versión 1 y reciben las ocho migraciones; revisa y respalda el esquema real antes de actualizar. V2 requiere relaciones válidas, V3 requiere eliminar encuentros duplicados por cita, V4 requiere asignar especialidades a médicos y servicios que tengan el campo vacío, y V8 requiere resolver cualquier duplicado existente de factura por cita antes de migrar.
 
 El correo usa SMTP. Configura `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_SSL` y `CLINICA_MAIL_FROM`. Los mensajes se conservan en una bandeja de salida y se reintentan automáticamente cada minuto hasta cinco intentos; un envío que se interrumpa se recupera al pasar diez minutos. El enlace de recuperación usa `CLINICA_PASSWORD_RESET_URL`. El umbral de inventario se configura con `CLINICA_MINIMUM_STOCK`.
@@ -54,4 +56,4 @@ Los identificadores del dominio son value objects UUID tipados con `generate()` 
 
 ## Pruebas
 
-La suite contiene 23 pruebas y cubre reglas de cancelación de citas, activación y roles de personal, visibilidad de historias clínicas, gestión de permisos, reintentos de correo, validación/exportación de reportes, cálculos y duplicados de facturación y generación de PDF. Se verificó el arranque integrado con JDK 21, las migraciones H2, Hibernate y la autorización dinámica por rol. Falta ejecutar las migraciones sobre una instancia MariaDB real.
+La suite contiene 31 pruebas y cubre reglas de citas y recordatorios, activación y roles de personal, visibilidad de historias clínicas, gestión de permisos, reintentos de correo, validación de pacientes, ajustes de inventario a cero, reportes, facturación y generación de PDF. La compilación y las pruebas pasan bajo JDK 25. También se verificó el arranque integrado con Hibernate y las ocho migraciones tanto en H2 como en la instancia MariaDB configurada para esta revisión; Hibernate validó el esquema, la API respondió correctamente y las consultas públicas de catálogos funcionaron. En MariaDB quedaron creados el esquema versionado por Flyway y los permisos predeterminados; no se insertaron usuarios ni pacientes de prueba. La instancia consultada usa MariaDB 10.2, versión antigua que Flyway marca fuera de soporte comunitario, por lo que conviene planear su actualización.

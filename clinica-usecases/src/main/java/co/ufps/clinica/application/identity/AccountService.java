@@ -20,7 +20,9 @@ public final class AccountService {
     public User registerPatient(String email, String password, String documentType, String documentNumber) {
         if (documentType == null || documentType.isBlank() || documentNumber == null || documentNumber.isBlank())
             throw new IllegalArgumentException("Tipo y número de documento son obligatorios para vincular la cuenta");
-        var patient = patients.findByDocument(documentType.trim(), documentNumber.trim())
+        String normalizedDocumentType = documentType.trim().toUpperCase(Locale.ROOT);
+        String normalizedDocumentNumber = documentNumber.trim().toUpperCase(Locale.ROOT);
+        var patient = patients.findByDocument(normalizedDocumentType, normalizedDocumentNumber)
                 .orElseThrow(() -> new IllegalArgumentException("No existe un perfil con esos datos de documento"));
         if (patient.accountUserId() != null) throw new IllegalArgumentException("El paciente ya tiene una cuenta asociada");
         String normalizedEmail = email == null ? "" : email.trim().toLowerCase(Locale.ROOT);

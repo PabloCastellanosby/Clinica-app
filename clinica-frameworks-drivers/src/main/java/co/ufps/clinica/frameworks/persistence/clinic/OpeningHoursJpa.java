@@ -5,7 +5,7 @@ import java.time.LocalTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "opening_hours", indexes = @Index(name = "idx_opening_hours_branch_day", columnList = "branch_id, day_of_week"))
+@Table(name = "OPENING_HOURS", indexes = @Index(name = "idx_opening_hours_branch_day", columnList = "branch_id, day_of_week"))
 public class OpeningHoursJpa {
     @Id @Column(name = "id", nullable = false, updatable = false) private UUID id;
     @Column(name = "branch_id", nullable = false) private UUID branchId;

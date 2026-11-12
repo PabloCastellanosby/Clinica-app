@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import java.util.UUID;
 
 @Entity
-@Table(name = "services", indexes = @Index(name = "idx_service_specialty", columnList = "specialty_id"))
+@Table(name = "SERVICES", indexes = @Index(name = "idx_service_specialty", columnList = "specialty_id"))
 public class ServiceJpa {
     @Id @Column(name = "id", nullable = false, updatable = false)
     private UUID id;

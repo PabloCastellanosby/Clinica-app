@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
-@Table(name = "stock_lots", indexes = {
+@Table(name = "STOCK_LOTS", indexes = {
         @Index(name = "idx_stock_lot_branch", columnList = "branch_id"),
         @Index(name = "idx_stock_lot_medicine", columnList = "medicine_id")
 })

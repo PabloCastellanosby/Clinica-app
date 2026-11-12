@@ -9,7 +9,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Table(name = "appointments", indexes = {
+@Table(name = "APPOINTMENTS", indexes = {
         @Index(name = "idx_appointment_doctor_time", columnList = "doctor_id, starts_at, ends_at"),
         @Index(name = "idx_appointment_office_time", columnList = "office_id, starts_at, ends_at")
 })

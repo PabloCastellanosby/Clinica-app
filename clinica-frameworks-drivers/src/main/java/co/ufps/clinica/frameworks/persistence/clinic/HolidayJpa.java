@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
-@Table(name = "holidays", indexes = @Index(name = "idx_holiday_branch", columnList = "branch_id"),
+@Table(name = "HOLIDAYS", indexes = @Index(name = "idx_holiday_branch", columnList = "branch_id"),
        uniqueConstraints = @UniqueConstraint(name = "uq_holiday_branch_date", columnNames = {"branch_id", "date"}))
 public class HolidayJpa {
     @Id @Column(name = "id", nullable = false, updatable = false)

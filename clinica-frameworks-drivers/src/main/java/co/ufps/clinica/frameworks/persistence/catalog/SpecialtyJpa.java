@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import java.util.UUID;
 
 @Entity
-@Table(name = "specialties")
+@Table(name = "SPECIALTIES")
 public class SpecialtyJpa {
     @Id @Column(name = "id", nullable = false, updatable = false)
     private UUID id;

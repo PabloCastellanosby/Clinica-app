@@ -9,5 +9,9 @@ public interface RolePermissionRepository {
     boolean isAllowed(Role role, String permissionKey);
     List<RolePermissionGrant> findAllGrants();
     void ensureDefault(Permission permission, Role role, boolean allowed);
+    default void ensureDefaults(List<RolePermissionGrant> defaults) {
+        for (RolePermissionGrant grant : defaults)
+            ensureDefault(grant.permission(), grant.role(), grant.allowed());
+    }
     void setAllowed(Role role, String permissionKey, boolean allowed);
 }

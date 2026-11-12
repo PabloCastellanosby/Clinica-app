@@ -33,8 +33,13 @@ public class CommunicationRepositoryJpa implements CommunicationRepository {
 
     @Override @Transactional public List<TransactionalMessage> claimPendingMessages(int limit) {
         Instant staleBefore = Instant.now().minusSeconds(600);
+        entityManager.createQuery("UPDATE TransactionalMessageJpa m SET m.status = :failed WHERE m.status = :sending AND m.attempts >= 5 AND (m.lastAttemptAt IS NULL OR m.lastAttemptAt < :staleBefore)")
+                .setParameter("failed", MessageStatus.FAILED.name())
+                .setParameter("sending", MessageStatus.SENDING.name())
+                .setParameter("staleBefore", staleBefore)
+                .executeUpdate();
         List<TransactionalMessageJpa> pending = entityManager.createQuery(
-                "SELECT m FROM TransactionalMessageJpa m WHERE m.attempts < 5 AND (m.status = :pending OR (m.status = :sending AND m.lastAttemptAt < :staleBefore)) ORDER BY m.createdAt",
+                "SELECT m FROM TransactionalMessageJpa m WHERE m.attempts < 5 AND (m.status = :pending OR (m.status = :sending AND (m.lastAttemptAt IS NULL OR m.lastAttemptAt < :staleBefore))) ORDER BY m.createdAt",
                 TransactionalMessageJpa.class)
                 .setParameter("pending", MessageStatus.PENDING.name())
                 .setParameter("sending", MessageStatus.SENDING.name())
@@ -61,7 +66,7 @@ public class CommunicationRepositoryJpa implements CommunicationRepository {
     }
 
     @Override public List<PatientNotice> findActiveNotices(BranchId branchId) {
-        return entityManager.createQuery("SELECT n FROM PatientNoticeJpa n WHERE n.branchId = :bid AND (n.expiresAt IS NULL OR n.expiresAt > :now)", PatientNoticeJpa.class)
+        return entityManager.createQuery("SELECT n FROM PatientNoticeJpa n WHERE (n.branchId IS NULL OR n.branchId = :bid) AND (n.expiresAt IS NULL OR n.expiresAt > :now)", PatientNoticeJpa.class)
                 .setParameter("bid", branchId.value()).setParameter("now", Instant.now())
                 .getResultList().stream().map(this::toDomainNotice).toList();
     }

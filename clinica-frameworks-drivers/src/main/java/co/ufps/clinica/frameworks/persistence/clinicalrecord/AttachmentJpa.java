@@ -1,11 +1,13 @@
 package co.ufps.clinica.frameworks.persistence.clinicalrecord;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Table(name = "attachments")
+@Table(name = "ATTACHMENTS")
 public class AttachmentJpa {
     @Id @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
@@ -22,7 +24,7 @@ public class AttachmentJpa {
     private String storageKey;
     @Column(name = "size_bytes")
     private long sizeBytes;
-    @Lob @Column(name = "content", nullable = false)
+    @JdbcTypeCode(SqlTypes.LONG32VARBINARY) @Column(name = "content", nullable = false)
     private byte[] content;
     @Column(name = "uploaded_at", nullable = false)
     private Instant uploadedAt;

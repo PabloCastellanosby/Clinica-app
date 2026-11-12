@@ -82,7 +82,7 @@ public final class AppointmentScheduler {
         Appointment saved = offerId == null
                 ? repository.createIfAvailable(appointment, reminder)
                 : repository.createFromWaitlistIfAvailable(appointment, reminder, offerId, offeredPatientId);
-        notifications.sendAppointmentConfirmation(saved);
+        notifications.sendAppointmentRequestReceived(saved);
         return saved;
     }
     public Appointment changeStatus(AppointmentId id, AppointmentStatus status) {
@@ -93,6 +93,7 @@ public final class AppointmentScheduler {
         Appointment updated = repository.save(status == AppointmentStatus.CANCELLED
                 ? current.cancel(reason == null || reason.isBlank() ? "Cancelada por recepción" : reason)
                 : current.withStatus(status));
+        if (status == AppointmentStatus.CONFIRMED) notifications.sendAppointmentConfirmed(updated);
         if (status == AppointmentStatus.CANCELLED) waitlist.offerNext(current);
         return updated;
     }

@@ -9,7 +9,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Table(name = "user_sessions", indexes = @Index(name = "idx_session_expiration", columnList = "expires_at"))
+@Table(name = "USER_SESSIONS", indexes = @Index(name = "idx_session_expiration", columnList = "expires_at"))
 public class UserSessionJpa {
     @Id @Column(name = "id", nullable = false, updatable = false) private UUID id;
     @Column(name = "user_id", nullable = false) private UUID userId;

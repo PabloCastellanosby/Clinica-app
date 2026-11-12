@@ -45,8 +45,9 @@ public final class InventoryService implements StockGateway {
     public StockMovement recordMovement(RecordMovementCommand command) {
         if (command == null || command.lotId() == null)
             throw new IllegalArgumentException("El movimiento debe indicar un lote");
-        if (command.quantity() <= 0) throw new IllegalArgumentException("La cantidad del movimiento debe ser positiva");
         if (command.type() == null || command.actorId() == null) throw new IllegalArgumentException("Tipo de movimiento y responsable son obligatorios");
+        if (command.type() == StockMovementType.ADJUSTMENT ? command.quantity() < 0 : command.quantity() <= 0)
+            throw new IllegalArgumentException("La cantidad del movimiento debe ser válida para su tipo");
         StockMovement movement = new StockMovement(StockMovementId.generate(), command.lotId(),
                 command.type(), command.quantity(), command.reason(), command.actorId(), Instant.now());
         repository.applyMovement(movement);
@@ -65,7 +66,9 @@ public final class InventoryService implements StockGateway {
 
     @Override
     public StockLot adjust(StockMovement movement) {
-        if (movement == null || movement.quantity() <= 0) throw new IllegalArgumentException("El movimiento debe tener cantidad positiva");
+        if (movement == null || (movement.type() == StockMovementType.ADJUSTMENT
+                ? movement.quantity() < 0 : movement.quantity() <= 0))
+            throw new IllegalArgumentException("El movimiento debe tener cantidad válida para su tipo");
         return repository.applyMovement(movement);
     }
 }

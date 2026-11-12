@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import java.util.UUID;
 
 @Entity
-@Table(name = "doctors", indexes = {
+@Table(name = "DOCTORS", indexes = {
         @Index(name = "idx_doctor_license", columnList = "license_number"),
         @Index(name = "idx_doctor_specialty", columnList = "specialty_id")
 })

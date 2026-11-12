@@ -10,6 +10,7 @@ import co.ufps.clinica.domain.patient.PatientId;
 import co.ufps.clinica.domain.staff.DoctorId;
 import co.ufps.clinica.frameworks.persistence.staff.DoctorJpa;
 import co.ufps.clinica.frameworks.persistence.clinic.OfficeJpa;
+import co.ufps.clinica.frameworks.persistence.patient.PatientJpa;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -23,10 +24,11 @@ import java.util.Optional;
 public class AppointmentRepositoryJpa implements AppointmentRepository, WaitlistRepository {
     @PersistenceContext EntityManager entityManager;
 
-    @Override public boolean hasConflict(DoctorId doctorId, OfficeId officeId, Instant from, Instant until) {
-        Long count = entityManager.createQuery("SELECT COUNT(a) FROM AppointmentJpa a WHERE a.status NOT IN :excluded AND a.startsAt < :until AND a.endsAt > :from AND (a.doctorId = :doctorId OR a.officeId = :officeId)", Long.class)
+    @Override public boolean hasConflict(PatientId patientId, DoctorId doctorId, OfficeId officeId, Instant from, Instant until) {
+        Long count = entityManager.createQuery("SELECT COUNT(a) FROM AppointmentJpa a WHERE a.status NOT IN :excluded AND a.startsAt < :until AND a.endsAt > :from AND (a.patientId = :patientId OR a.doctorId = :doctorId OR a.officeId = :officeId)", Long.class)
                 .setParameter("excluded", List.of(AppointmentStatus.CANCELLED.name(), AppointmentStatus.NO_SHOW.name()))
                 .setParameter("until", until).setParameter("from", from)
+                .setParameter("patientId", patientId.value())
                 .setParameter("doctorId", doctorId.value()).setParameter("officeId", officeId.value())
                 .getSingleResult();
         return count > 0;
@@ -67,12 +69,14 @@ public class AppointmentRepositoryJpa implements AppointmentRepository, Waitlist
     }
 
     private void lockAndCheckAvailability(Appointment appointment) {
+        if (entityManager.find(PatientJpa.class, appointment.patientId().value(), jakarta.persistence.LockModeType.PESSIMISTIC_WRITE) == null)
+            throw new java.util.NoSuchElementException("Paciente no encontrado");
         if (entityManager.find(DoctorJpa.class, appointment.doctorId().value(), jakarta.persistence.LockModeType.PESSIMISTIC_WRITE) == null)
             throw new java.util.NoSuchElementException("Médico no encontrado");
         if (entityManager.find(OfficeJpa.class, appointment.officeId().value(), jakarta.persistence.LockModeType.PESSIMISTIC_WRITE) == null)
             throw new java.util.NoSuchElementException("Consultorio no encontrado");
-        if (hasConflict(appointment.doctorId(), appointment.officeId(), appointment.startsAt(), appointment.endsAt()))
-            throw new IllegalStateException("El médico o consultorio ya está ocupado");
+        if (hasConflict(appointment.patientId(), appointment.doctorId(), appointment.officeId(), appointment.startsAt(), appointment.endsAt()))
+            throw new IllegalStateException("El paciente, médico o consultorio ya tiene otra cita en ese horario");
     }
 
     @Override @Transactional public AppointmentReminder saveReminder(AppointmentReminder reminder) {
@@ -80,10 +84,23 @@ public class AppointmentRepositoryJpa implements AppointmentRepository, Waitlist
         return reminder;
     }
 
-    @Override public List<AppointmentReminder> findDueReminders(Instant now, int limit) {
-        return entityManager.createQuery("SELECT r FROM AppointmentReminderJpa r WHERE r.sentAt IS NULL AND r.attempts < 5 AND r.scheduledAt <= :now AND EXISTS (SELECT a.id FROM AppointmentJpa a WHERE a.id = r.appointmentId AND a.status NOT IN :excluded) ORDER BY r.scheduledAt", AppointmentReminderJpa.class)
-                .setParameter("now", now).setParameter("excluded", List.of(AppointmentStatus.CANCELLED.name(), AppointmentStatus.NO_SHOW.name()))
-                .setMaxResults(Math.max(1, Math.min(limit, 500))).getResultList().stream().map(this::toDomainReminder).toList();
+    @Override @Transactional public List<AppointmentReminder> claimDueReminders(Instant now, int limit) {
+        Instant staleBefore = now.minusSeconds(600);
+        List<AppointmentReminderJpa> due = entityManager.createQuery(
+                "SELECT r FROM AppointmentReminderJpa r WHERE r.sentAt IS NULL AND r.attempts < 5 AND r.scheduledAt <= :now AND (r.lastAttemptAt IS NULL OR r.lastAttemptAt <= :staleBefore) AND EXISTS (SELECT a.id FROM AppointmentJpa a WHERE a.id = r.appointmentId AND a.status = :confirmed AND a.startsAt > :now) ORDER BY r.scheduledAt",
+                AppointmentReminderJpa.class)
+                .setParameter("now", now)
+                .setParameter("staleBefore", staleBefore)
+                .setParameter("confirmed", AppointmentStatus.CONFIRMED.name())
+                .setLockMode(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+                .setMaxResults(Math.max(1, Math.min(limit, 500))).getResultList();
+        for (AppointmentReminderJpa jpa : due) {
+            AppointmentReminder claimed = toDomainReminder(jpa).claimedAt(now);
+            jpa.setAttempts(claimed.attempts());
+            jpa.setLastAttemptAt(claimed.lastAttemptAt());
+        }
+        entityManager.flush();
+        return due.stream().map(this::toDomainReminder).toList();
     }
 
     @Override public List<Appointment> findForDoctor(DoctorId doctorId, Instant from, Instant until) {

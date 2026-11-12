@@ -10,6 +10,11 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
 
 @ApplicationScoped
 public class RolePermissionRepositoryJpa implements RolePermissionRepository {
@@ -48,6 +53,43 @@ public class RolePermissionRepositoryJpa implements RolePermissionRepository {
             grant.setAllowed(allowed);
             entityManager.persist(grant);
         }
+    }
+
+    @Override @Transactional public void ensureDefaults(List<RolePermissionGrant> defaults) {
+        if (defaults == null || defaults.isEmpty()) return;
+        Map<String, Permission> permissions = new LinkedHashMap<>();
+        for (RolePermissionGrant grant : defaults)
+            permissions.putIfAbsent(grant.permission().key(), grant.permission());
+        List<String> keys = new ArrayList<>(permissions.keySet());
+
+        Set<String> knownPermissions = new HashSet<>();
+        entityManager.createQuery("SELECT p.permissionKey FROM PermissionJpa p WHERE p.permissionKey IN :keys", String.class)
+                .setParameter("keys", keys).getResultList().forEach(knownPermissions::add);
+        for (Permission permission : permissions.values()) {
+            if (knownPermissions.add(permission.key())) {
+                PermissionJpa jpa = new PermissionJpa();
+                jpa.setId(permission.id().value());
+                jpa.setPermissionKey(permission.key());
+                jpa.setDescription(permission.description());
+                entityManager.persist(jpa);
+            }
+        }
+
+        Set<RolePermissionJpaId> knownGrants = new HashSet<>();
+        entityManager.createQuery("SELECT r FROM RolePermissionJpa r WHERE r.permissionKey IN :keys", RolePermissionJpa.class)
+                .setParameter("keys", keys).getResultList()
+                .forEach(grant -> knownGrants.add(new RolePermissionJpaId(grant.getRole(), grant.getPermissionKey())));
+        for (RolePermissionGrant grant : defaults) {
+            RolePermissionJpaId id = new RolePermissionJpaId(grant.role().name(), grant.permission().key());
+            if (knownGrants.add(id)) {
+                RolePermissionJpa jpa = new RolePermissionJpa();
+                jpa.setRole(grant.role().name());
+                jpa.setPermissionKey(grant.permission().key());
+                jpa.setAllowed(grant.allowed());
+                entityManager.persist(jpa);
+            }
+        }
+        entityManager.flush();
     }
 
     @Override @Transactional public void setAllowed(Role role, String permissionKey, boolean allowed) {

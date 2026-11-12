@@ -19,7 +19,8 @@ public final class CommunicationController {
 
     public NoticeResponse publishNotice(PublishNoticeRequest request) {
         PatientNotice n = service.publishNotice(new PublishNoticeCommand(
-                request.title(), request.body(), request.expiresAt(), BranchId.of(java.util.UUID.fromString(request.branchId()))));
+                request.title(), request.body(), request.expiresAt(), request.branchId() == null || request.branchId().isBlank()
+                        ? null : BranchId.of(java.util.UUID.fromString(request.branchId()))));
         return presentNotice(n);
     }
 
@@ -42,6 +43,6 @@ public final class CommunicationController {
 
     private NoticeResponse presentNotice(PatientNotice n) {
         return new NoticeResponse(n.id().value().toString(), n.title(), n.body(),
-                n.publishedAt(), n.expiresAt(), n.branchId().value().toString());
+                n.publishedAt(), n.expiresAt(), n.branchId() == null ? null : n.branchId().value().toString());
     }
 }

@@ -5,7 +5,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Table(name = "transactional_messages", indexes = @Index(name = "idx_message_recipient", columnList = "recipient_id"))
+@Table(name = "TRANSACTIONAL_MESSAGES", indexes = @Index(name = "idx_message_recipient", columnList = "recipient_id"))
 public class TransactionalMessageJpa {
     @Id @Column(name = "id", nullable = false, updatable = false)
     private UUID id;

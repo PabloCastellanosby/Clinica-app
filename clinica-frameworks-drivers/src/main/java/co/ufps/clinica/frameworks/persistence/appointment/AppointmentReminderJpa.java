@@ -5,7 +5,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Table(name = "appointment_reminders", indexes = @Index(name = "idx_reminder_due", columnList = "sent_at, scheduled_at"),
+@Table(name = "APPOINTMENT_REMINDERS", indexes = @Index(name = "idx_reminder_due", columnList = "sent_at, scheduled_at"),
        uniqueConstraints = @UniqueConstraint(name = "uq_reminder_appointment", columnNames = "appointment_id"))
 public class AppointmentReminderJpa {
     @Id @Column(name = "id", nullable = false, updatable = false) private UUID id;
