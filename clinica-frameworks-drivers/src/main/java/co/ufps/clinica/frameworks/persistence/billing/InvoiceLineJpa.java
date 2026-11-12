@@ -10,6 +10,9 @@ public class InvoiceLineJpa {
     private UUID id;
     @Column(name = "invoice_id", nullable = false)
     private UUID invoiceId;
+    @jakarta.persistence.ManyToOne(fetch = jakarta.persistence.FetchType.LAZY)
+    @jakarta.persistence.JoinColumn(name = "invoice_id", insertable = false, updatable = false, foreignKey = @jakarta.persistence.ForeignKey(name = "fk_invoice_lines_invoice"))
+    private co.ufps.clinica.frameworks.persistence.billing.InvoiceJpa invoiceReference;
     @Column(name = "description", length = 500, nullable = false)
     private String description;
     @Column(name = "quantity", nullable = false)

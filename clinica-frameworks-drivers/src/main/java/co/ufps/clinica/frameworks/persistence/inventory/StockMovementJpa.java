@@ -11,6 +11,9 @@ public class StockMovementJpa {
     private UUID id;
     @Column(name = "lot_id", nullable = false)
     private UUID lotId;
+    @jakarta.persistence.ManyToOne(fetch = jakarta.persistence.FetchType.LAZY)
+    @jakarta.persistence.JoinColumn(name = "lot_id", insertable = false, updatable = false, foreignKey = @jakarta.persistence.ForeignKey(name = "fk_stock_movements_lot"))
+    private co.ufps.clinica.frameworks.persistence.inventory.StockLotJpa lotReference;
     @Column(name = "type", length = 20, nullable = false)
     private String type;
     @Column(name = "quantity", nullable = false)
@@ -19,6 +22,9 @@ public class StockMovementJpa {
     private String reason;
     @Column(name = "actor_id", nullable = false)
     private UUID actorId;
+    @jakarta.persistence.ManyToOne(fetch = jakarta.persistence.FetchType.LAZY)
+    @jakarta.persistence.JoinColumn(name = "actor_id", insertable = false, updatable = false, foreignKey = @jakarta.persistence.ForeignKey(name = "fk_stock_movements_actor"))
+    private co.ufps.clinica.frameworks.persistence.identity.UserJpa actorReference;
     @Column(name = "occurred_at", nullable = false)
     private Instant occurredAt;
 

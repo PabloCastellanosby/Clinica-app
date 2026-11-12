@@ -22,4 +22,12 @@ public record Appointment(AppointmentId id, PatientId patientId, DoctorId doctor
         if (status == null || next == null || !status.canTransitionTo(next)) throw new IllegalStateException("Transición de cita no permitida: " + status + " -> " + next);
         return new Appointment(id, patientId, doctorId, branchId, officeId, serviceId, startsAt, endsAt, next, cancellationReason, createdAt);
     }
+
+    public Appointment cancel(String reason) {
+        if (status == null || !status.canTransitionTo(AppointmentStatus.CANCELLED))
+            throw new IllegalStateException("La cita ya no se puede cancelar");
+        String normalizedReason = reason == null || reason.isBlank() ? "Cancelada por el paciente" : reason.trim();
+        return new Appointment(id, patientId, doctorId, branchId, officeId, serviceId, startsAt, endsAt,
+                AppointmentStatus.CANCELLED, normalizedReason, createdAt);
+    }
 }

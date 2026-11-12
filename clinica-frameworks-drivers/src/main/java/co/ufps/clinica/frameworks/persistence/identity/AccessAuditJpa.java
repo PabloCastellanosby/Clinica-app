@@ -15,6 +15,9 @@ public class AccessAuditJpa {
     private UUID id;
     @Column(name = "user_id")
     private UUID userId;
+    @jakarta.persistence.ManyToOne(fetch = jakarta.persistence.FetchType.LAZY)
+    @jakarta.persistence.JoinColumn(name = "user_id", insertable = false, updatable = false, foreignKey = @jakarta.persistence.ForeignKey(name = "fk_access_audit_user"))
+    private co.ufps.clinica.frameworks.persistence.identity.UserJpa userReference;
     @Column(name = "action", length = 80, nullable = false)
     private String action;
     @Column(name = "ip_address", length = 80)

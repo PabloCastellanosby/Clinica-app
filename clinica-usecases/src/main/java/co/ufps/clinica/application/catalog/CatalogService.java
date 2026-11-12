@@ -9,6 +9,8 @@ public final class CatalogService {
     public CatalogService(CatalogRepository repository) { this.repository = Objects.requireNonNull(repository); }
 
     public Specialty createSpecialty(CreateSpecialtyCommand command) {
+        if (command == null || command.name() == null || command.name().isBlank())
+            throw new IllegalArgumentException("El nombre de la especialidad es obligatorio");
         Specialty specialty = new Specialty(SpecialtyId.generate(), command.name(), command.description(), true);
         return repository.saveSpecialty(specialty);
     }
@@ -18,6 +20,10 @@ public final class CatalogService {
     }
 
     public Service createService(CreateServiceCommand command) {
+        if (command == null || command.specialtyId() == null)
+            throw new IllegalArgumentException("El servicio debe estar asociado a una especialidad");
+        repository.findSpecialtyById(command.specialtyId()).filter(Specialty::active)
+                .orElseThrow(() -> new NoSuchElementException("Especialidad activa no encontrada"));
         Service service = new Service(ServiceId.generate(), command.specialtyId(), command.name(),
                 command.description(), command.priceMinorUnits(), command.currency(), true);
         return repository.saveService(service);

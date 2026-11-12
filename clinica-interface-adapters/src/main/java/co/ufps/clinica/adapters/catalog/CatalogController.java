@@ -20,7 +20,7 @@ public final class CatalogController {
 
     public ServiceResponse createService(CreateServiceRequest request) {
         Service s = catalogService.createService(new CreateServiceCommand(
-                SpecialtyId.of(request.specialtyId()), request.name(), request.description(),
+                SpecialtyId.of(java.util.UUID.fromString(request.specialtyId())), request.name(), request.description(),
                 request.priceMinorUnits(), request.currency()));
         return presentService(s);
     }
@@ -30,15 +30,15 @@ public final class CatalogController {
     }
 
     public List<ServiceResponse> getServicesBySpecialty(String specialtyId) {
-        return catalogService.getServicesBySpecialty(SpecialtyId.of(specialtyId)).stream().map(this::presentService).toList();
+        return catalogService.getServicesBySpecialty(SpecialtyId.of(java.util.UUID.fromString(specialtyId))).stream().map(this::presentService).toList();
     }
 
     private SpecialtyResponse presentSpecialty(Specialty s) {
-        return new SpecialtyResponse(s.id().value().toString(), s.name(), s.description(), s.isActive());
+        return new SpecialtyResponse(s.id().value().toString(), s.name(), s.description(), s.active());
     }
 
     private ServiceResponse presentService(Service s) {
         return new ServiceResponse(s.id().value().toString(), s.specialtyId().value().toString(),
-                s.name(), s.description(), s.priceMinorUnits(), s.currency(), s.isActive());
+                s.name(), s.description(), s.priceMinorUnits(), s.currency(), s.active());
     }
 }

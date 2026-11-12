@@ -4,31 +4,56 @@ import co.ufps.clinica.domain.billing.*;
 import co.ufps.clinica.domain.appointment.AppointmentId;
 import co.ufps.clinica.domain.patient.PatientId;
 import co.ufps.clinica.application.port.out.billing.InvoiceRepository;
+import co.ufps.clinica.application.port.out.patient.PatientRepository;
+import co.ufps.clinica.application.port.out.appointment.AppointmentRepository;
 import java.time.Instant;
 import java.util.*;
 
 public final class InvoiceService {
     private final InvoiceRepository repository;
-    public InvoiceService(InvoiceRepository repository) { this.repository = Objects.requireNonNull(repository); }
+    private final PatientRepository patients;
+    private final AppointmentRepository appointments;
+    public InvoiceService(InvoiceRepository repository, PatientRepository patients, AppointmentRepository appointments) {
+        this.repository = Objects.requireNonNull(repository);
+        this.patients = Objects.requireNonNull(patients);
+        this.appointments = Objects.requireNonNull(appointments);
+    }
 
     public Invoice createInvoice(CreateInvoiceCommand command) {
-        long subtotal = command.lines().stream().mapToLong(l -> l.quantity() * l.unitPrice()).sum();
-        long tax = subtotal * command.taxRate() / 100;
-        long total = subtotal + tax;
-        String number = "INV-" + Instant.now().getEpochSecond();
-        Invoice invoice = new Invoice(InvoiceId.generate(), command.patientId(), command.appointmentId(),
-                number, Instant.now(), subtotal, tax, total, command.currency(), InvoiceStatus.PENDING);
-        Invoice saved = repository.save(invoice);
-        for (InvoiceLine line : command.lines()) {
-            InvoiceLine il = new InvoiceLine(InvoiceLineId.generate(), saved.id(),
-                    line.description(), line.quantity(), line.unitPrice(), (long) line.quantity() * line.unitPrice());
-            repository.saveLine(il);
+        Objects.requireNonNull(command, "La factura es obligatoria");
+        patients.findById(command.patientId()).orElseThrow(() -> new NoSuchElementException("Paciente no encontrado"));
+        if (command.appointmentId() != null) {
+            if (repository.findByAppointment(command.appointmentId()).isPresent())
+                throw new IllegalStateException("La cita ya tiene una factura asociada");
+            var appointment = appointments.findById(command.appointmentId())
+                    .orElseThrow(() -> new NoSuchElementException("Cita no encontrada"));
+            if (!appointment.patientId().equals(command.patientId()))
+                throw new IllegalArgumentException("La cita pertenece a otro paciente");
         }
-        return saved;
+        Instant now = Instant.now();
+        InvoiceId id = InvoiceId.generate();
+        long subtotal = 0;
+        List<InvoiceLine> lines = new ArrayList<>();
+        for (CreateInvoiceCommand.InvoiceLineDto line : command.lines()) {
+            if (line == null || line.description() == null || line.description().isBlank()
+                    || line.quantity() <= 0 || line.unitPrice() < 0) {
+                throw new IllegalArgumentException("Cada línea requiere descripción, cantidad positiva y precio no negativo");
+            }
+            long lineTotal = Math.multiplyExact((long) line.quantity(), line.unitPrice());
+            subtotal = Math.addExact(subtotal, lineTotal);
+            lines.add(new InvoiceLine(InvoiceLineId.generate(), id, line.description().trim(),
+                    line.quantity(), line.unitPrice(), lineTotal));
+        }
+        long tax = Math.multiplyExact(subtotal, command.taxRate()) / 100;
+        long total = Math.addExact(subtotal, tax);
+        Invoice invoice = new Invoice(id, command.patientId(), command.appointmentId(),
+                "INV-" + id.value(), now, subtotal, tax, total, command.currency(), InvoiceStatus.PENDING);
+        return repository.saveWithLines(invoice, lines);
     }
 
     public Invoice changeStatus(InvoiceId id, InvoiceStatus status) {
         Invoice current = repository.findById(id).orElseThrow(() -> new NoSuchElementException("Factura no encontrada"));
+        if (!current.status().canTransitionTo(status)) throw new IllegalStateException("Transición de factura no permitida");
         Invoice updated = new Invoice(current.id(), current.patientId(), current.appointmentId(),
                 current.number(), current.issuedAt(), current.subtotal(), current.tax(), current.total(),
                 current.currency(), status);

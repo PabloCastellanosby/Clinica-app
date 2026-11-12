@@ -11,10 +11,19 @@ public class PrescriptionJpa {
     private UUID id;
     @Column(name = "encounter_id", nullable = false)
     private UUID encounterId;
+    @jakarta.persistence.ManyToOne(fetch = jakarta.persistence.FetchType.LAZY)
+    @jakarta.persistence.JoinColumn(name = "encounter_id", insertable = false, updatable = false, foreignKey = @jakarta.persistence.ForeignKey(name = "fk_prescriptions_encounter"))
+    private co.ufps.clinica.frameworks.persistence.clinicalrecord.EncounterJpa encounterReference;
     @Column(name = "patient_id", nullable = false)
     private UUID patientId;
+    @jakarta.persistence.ManyToOne(fetch = jakarta.persistence.FetchType.LAZY)
+    @jakarta.persistence.JoinColumn(name = "patient_id", insertable = false, updatable = false, foreignKey = @jakarta.persistence.ForeignKey(name = "fk_prescriptions_patient"))
+    private co.ufps.clinica.frameworks.persistence.patient.PatientJpa patientReference;
     @Column(name = "doctor_id", nullable = false)
     private UUID doctorId;
+    @jakarta.persistence.ManyToOne(fetch = jakarta.persistence.FetchType.LAZY)
+    @jakarta.persistence.JoinColumn(name = "doctor_id", insertable = false, updatable = false, foreignKey = @jakarta.persistence.ForeignKey(name = "fk_prescriptions_doctor"))
+    private co.ufps.clinica.frameworks.persistence.staff.DoctorJpa doctorReference;
     @Column(name = "issued_at", nullable = false)
     private Instant issuedAt;
     @Column(name = "instructions", length = 2000)

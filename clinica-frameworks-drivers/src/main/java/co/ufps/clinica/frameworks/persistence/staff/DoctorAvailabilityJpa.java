@@ -13,8 +13,14 @@ public class DoctorAvailabilityJpa {
     private UUID id;
     @Column(name = "doctor_id", nullable = false)
     private UUID doctorId;
+    @jakarta.persistence.ManyToOne(fetch = jakarta.persistence.FetchType.LAZY)
+    @jakarta.persistence.JoinColumn(name = "doctor_id", insertable = false, updatable = false, foreignKey = @jakarta.persistence.ForeignKey(name = "fk_doctor_availability_doctor"))
+    private co.ufps.clinica.frameworks.persistence.staff.DoctorJpa doctorReference;
     @Column(name = "branch_id", nullable = false)
     private UUID branchId;
+    @jakarta.persistence.ManyToOne(fetch = jakarta.persistence.FetchType.LAZY)
+    @jakarta.persistence.JoinColumn(name = "branch_id", insertable = false, updatable = false, foreignKey = @jakarta.persistence.ForeignKey(name = "fk_doctor_availability_branch"))
+    private co.ufps.clinica.frameworks.persistence.clinic.BranchJpa branchReference;
     @Column(name = "day_of_week", length = 20, nullable = false)
     private String day;
     @Column(name = "starts_at", nullable = false)

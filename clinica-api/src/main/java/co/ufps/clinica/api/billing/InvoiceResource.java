@@ -8,8 +8,11 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.util.List;
+import co.ufps.clinica.api.security.RequireRoles;
+import co.ufps.clinica.domain.identity.Role;
 
 @Path("/api/invoices")
+@RequireRoles({Role.ADMINISTRADOR, Role.RECEPCION})
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class InvoiceResource {

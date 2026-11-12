@@ -14,13 +14,13 @@ public final class DoctorController {
 
     public DoctorResponse registerDoctor(RegisterDoctorRequest request) {
         Doctor d = doctorService.registerDoctor(new RegisterDoctorCommand(
-                UserId.of(request.userId()), request.licenseNumber(), request.firstName(),
-                request.lastName(), SpecialtyId.of(request.specialtyId())));
+                UserId.of(java.util.UUID.fromString(request.userId())), request.licenseNumber(), request.firstName(),
+                request.lastName(), SpecialtyId.of(java.util.UUID.fromString(request.specialtyId()))));
         return presentDoctor(d);
     }
 
     public DoctorResponse updateStatus(String id, String status) {
-        Doctor d = doctorService.updateStatus(DoctorId.of(id), StaffStatus.valueOf(status));
+        Doctor d = doctorService.updateStatus(DoctorId.of(java.util.UUID.fromString(id)), StaffStatus.valueOf(status));
         return presentDoctor(d);
     }
 
@@ -29,19 +29,19 @@ public final class DoctorController {
     }
 
     public List<DoctorResponse> getDoctorsBySpecialty(String specialtyId) {
-        return doctorService.getDoctorsBySpecialty(SpecialtyId.of(specialtyId)).stream().map(this::presentDoctor).toList();
+        return doctorService.getDoctorsBySpecialty(SpecialtyId.of(java.util.UUID.fromString(specialtyId))).stream().map(this::presentDoctor).toList();
     }
 
     public AvailabilityResponse setAvailability(SetAvailabilityRequest request) {
         DoctorAvailability a = doctorService.setAvailability(new SetDoctorAvailabilityCommand(
-                DoctorId.of(request.doctorId()), BranchId.of(request.branchId()),
+                DoctorId.of(java.util.UUID.fromString(request.doctorId())), BranchId.of(java.util.UUID.fromString(request.branchId())),
                 java.time.DayOfWeek.valueOf(request.day()), request.startsAt(), request.endsAt(),
                 request.validFrom(), request.validUntil()));
         return presentAvailability(a);
     }
 
     public List<AvailabilityResponse> getDoctorAvailability(String doctorId) {
-        return doctorService.getDoctorAvailability(DoctorId.of(doctorId)).stream().map(this::presentAvailability).toList();
+        return doctorService.getDoctorAvailability(DoctorId.of(java.util.UUID.fromString(doctorId))).stream().map(this::presentAvailability).toList();
     }
 
     private DoctorResponse presentDoctor(Doctor d) {

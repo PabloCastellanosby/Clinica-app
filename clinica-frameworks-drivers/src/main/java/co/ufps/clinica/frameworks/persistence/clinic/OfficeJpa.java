@@ -10,6 +10,9 @@ public class OfficeJpa {
     private UUID id;
     @Column(name = "branch_id", nullable = false)
     private UUID branchId;
+    @jakarta.persistence.ManyToOne(fetch = jakarta.persistence.FetchType.LAZY)
+    @jakarta.persistence.JoinColumn(name = "branch_id", insertable = false, updatable = false, foreignKey = @jakarta.persistence.ForeignKey(name = "fk_offices_branch"))
+    private co.ufps.clinica.frameworks.persistence.clinic.BranchJpa branchReference;
     @Column(name = "name", length = 100, nullable = false)
     private String name;
     @Column(name = "type", length = 50)

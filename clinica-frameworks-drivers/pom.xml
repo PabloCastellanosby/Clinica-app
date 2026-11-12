@@ -6,6 +6,11 @@
     <dependency><groupId>co.ufps.clinica</groupId><artifactId>clinica-usecases</artifactId><version>${project.version}</version></dependency>
     <dependency><groupId>io.quarkus</groupId><artifactId>quarkus-hibernate-orm</artifactId></dependency>
     <dependency><groupId>io.quarkus</groupId><artifactId>quarkus-arc</artifactId></dependency>
+    <dependency><groupId>io.quarkus</groupId><artifactId>quarkus-mailer</artifactId></dependency>
+    <dependency><groupId>org.junit.jupiter</groupId><artifactId>junit-jupiter</artifactId><scope>test</scope></dependency>
   </dependencies>
-  <build><plugins><plugin><groupId>io.smallrye</groupId><artifactId>jandex-maven-plugin</artifactId><version>3.1.5</version><executions><execution><id>make-index</id><goals><goal>jandex</goal></goals></execution></executions></plugin></plugins></build>
+  <build><plugins>
+    <plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-surefire-plugin</artifactId><configuration><systemPropertyVariables><java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager></systemPropertyVariables></configuration></plugin>
+    <plugin><groupId>io.smallrye</groupId><artifactId>jandex-maven-plugin</artifactId><version>3.1.5</version><executions><execution><id>make-index</id><goals><goal>jandex</goal></goals></execution></executions></plugin>
+  </plugins></build>
 </project>

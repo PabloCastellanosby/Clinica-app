@@ -14,4 +14,8 @@ public interface ClinicRepository {
     Office saveOffice(Office office);
     Optional<Office> findOfficeById(OfficeId id);
     List<Office> findOfficesByBranch(BranchId branchId);
+    Holiday saveHoliday(Holiday holiday);
+    List<Holiday> findHolidaysByBranch(BranchId branchId);
+    OpeningHours saveOpeningHours(OpeningHours openingHours);
+    List<OpeningHours> findOpeningHoursByBranch(BranchId branchId);
 }

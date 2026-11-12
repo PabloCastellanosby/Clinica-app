@@ -10,6 +10,9 @@ public class PrescriptionLineJpa {
     private UUID id;
     @Column(name = "prescription_id", nullable = false)
     private UUID prescriptionId;
+    @jakarta.persistence.ManyToOne(fetch = jakarta.persistence.FetchType.LAZY)
+    @jakarta.persistence.JoinColumn(name = "prescription_id", insertable = false, updatable = false, foreignKey = @jakarta.persistence.ForeignKey(name = "fk_prescription_lines_prescription"))
+    private co.ufps.clinica.frameworks.persistence.clinicalrecord.PrescriptionJpa prescriptionReference;
     @Column(name = "medicine", length = 200, nullable = false)
     private String medicine;
     @Column(name = "presentation", length = 100)

@@ -21,17 +21,27 @@ public class DoctorRepositoryJpa implements DoctorRepository {
     }
 
     @Override public Optional<Doctor> findById(DoctorId id) {
-        DoctorJpa jpa = entityManager.find(DoctorJpa.class, id.value());
-        return Optional.ofNullable(jpa).map(this::toDomain);
+        return entityManager.createQuery("SELECT d FROM DoctorJpa d WHERE d.id = :id AND EXISTS "
+                        + "(SELECT u.id FROM UserJpa u WHERE u.id = d.userId AND u.active = true)", DoctorJpa.class)
+                .setParameter("id", id.value()).getResultStream().findFirst().map(this::toDomain);
+    }
+
+    @Override public Optional<Doctor> findByUserId(UserId userId) {
+        return entityManager.createQuery("SELECT d FROM DoctorJpa d WHERE d.userId = :userId AND EXISTS "
+                        + "(SELECT u.id FROM UserJpa u WHERE u.id = d.userId AND u.active = true)", DoctorJpa.class)
+                .setParameter("userId", userId.value()).getResultStream().findFirst().map(this::toDomain);
     }
 
     @Override public List<Doctor> findAllActive() {
-        return entityManager.createQuery("SELECT d FROM DoctorJpa d WHERE d.status = :status", DoctorJpa.class)
+        return entityManager.createQuery("SELECT d FROM DoctorJpa d WHERE d.status = :status AND EXISTS "
+                        + "(SELECT u.id FROM UserJpa u WHERE u.id = d.userId AND u.active = true)", DoctorJpa.class)
                 .setParameter("status", StaffStatus.ACTIVE.name()).getResultList().stream().map(this::toDomain).toList();
     }
 
     @Override public List<Doctor> findBySpecialty(SpecialtyId specialtyId) {
-        return entityManager.createQuery("SELECT d FROM DoctorJpa d WHERE d.specialtyId = :sid", DoctorJpa.class)
+        return entityManager.createQuery("SELECT d FROM DoctorJpa d WHERE d.specialtyId = :sid AND d.status = :status AND EXISTS "
+                        + "(SELECT u.id FROM UserJpa u WHERE u.id = d.userId AND u.active = true)", DoctorJpa.class)
+                .setParameter("status", StaffStatus.ACTIVE.name())
                 .setParameter("sid", specialtyId.value()).getResultList().stream().map(this::toDomain).toList();
     }
 

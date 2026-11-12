@@ -6,8 +6,11 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.util.List;
+import co.ufps.clinica.api.security.RequireRoles;
+import co.ufps.clinica.domain.identity.Role;
 
 @Path("/api/clinics")
+@RequireRoles({Role.ADMINISTRADOR})
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class ClinicResource {
@@ -50,5 +53,21 @@ public class ClinicResource {
     public Response createHoliday(CreateHolidayRequest request) {
         HolidayResponse response = clinicController.createHoliday(request);
         return Response.status(Response.Status.CREATED).entity(response).build();
+    }
+
+    @GET @Path("/holidays/branch/{branchId}")
+    public List<HolidayResponse> getHolidaysByBranch(@PathParam("branchId") String branchId) {
+        return clinicController.getHolidaysByBranch(branchId);
+    }
+
+    @POST @Path("/opening-hours")
+    public Response setOpeningHours(SetOpeningHoursRequest request) {
+        OpeningHoursResponse response = clinicController.setOpeningHours(request);
+        return Response.status(Response.Status.CREATED).entity(response).build();
+    }
+
+    @GET @Path("/opening-hours/branch/{branchId}")
+    public List<OpeningHoursResponse> getOpeningHours(@PathParam("branchId") String branchId) {
+        return clinicController.getOpeningHours(branchId);
     }
 }

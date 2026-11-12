@@ -12,6 +12,9 @@ public class VitalSignsJpa {
     private UUID id;
     @Column(name = "encounter_id", nullable = false)
     private UUID encounterId;
+    @jakarta.persistence.ManyToOne(fetch = jakarta.persistence.FetchType.LAZY)
+    @jakarta.persistence.JoinColumn(name = "encounter_id", insertable = false, updatable = false, foreignKey = @jakarta.persistence.ForeignKey(name = "fk_vital_signs_encounter"))
+    private co.ufps.clinica.frameworks.persistence.clinicalrecord.EncounterJpa encounterReference;
     @Column(name = "temperature_c", precision = 4, scale = 1)
     private BigDecimal temperatureC;
     @Column(name = "systolic")

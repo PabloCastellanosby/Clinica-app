@@ -31,6 +31,25 @@ public class CommunicationRepositoryJpa implements CommunicationRepository {
                 .setParameter("uid", userId.value()).getResultList().stream().map(this::toDomainMessage).toList();
     }
 
+    @Override @Transactional public List<TransactionalMessage> claimPendingMessages(int limit) {
+        Instant staleBefore = Instant.now().minusSeconds(600);
+        List<TransactionalMessageJpa> pending = entityManager.createQuery(
+                "SELECT m FROM TransactionalMessageJpa m WHERE m.attempts < 5 AND (m.status = :pending OR (m.status = :sending AND m.lastAttemptAt < :staleBefore)) ORDER BY m.createdAt",
+                TransactionalMessageJpa.class)
+                .setParameter("pending", MessageStatus.PENDING.name())
+                .setParameter("sending", MessageStatus.SENDING.name())
+                .setParameter("staleBefore", staleBefore)
+                .setLockMode(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+                .setMaxResults(Math.max(1, Math.min(limit, 200))).getResultList();
+        for (TransactionalMessageJpa message : pending) {
+            message.setStatus(MessageStatus.SENDING.name());
+            message.setAttempts(message.getAttempts() + 1);
+            message.setLastAttemptAt(Instant.now());
+        }
+        entityManager.flush();
+        return pending.stream().map(this::toDomainMessage).toList();
+    }
+
     @Override @Transactional public PatientNotice saveNotice(PatientNotice notice) {
         entityManager.merge(toJpa(notice));
         return notice;
@@ -53,13 +72,15 @@ public class CommunicationRepositoryJpa implements CommunicationRepository {
         jpa.setDestination(m.destination()); jpa.setSubject(m.subject());
         jpa.setTemplate(m.template()); jpa.setStatus(m.status().name());
         jpa.setCreatedAt(m.createdAt()); jpa.setSentAt(m.sentAt());
+        jpa.setAttempts(m.attempts());
+        jpa.setLastAttemptAt(m.lastAttemptAt());
         return jpa;
     }
     private TransactionalMessage toDomainMessage(TransactionalMessageJpa jpa) {
         return new TransactionalMessage(TransactionalMessageId.of(jpa.getId()),
                 jpa.getRecipientId() == null ? null : UserId.of(jpa.getRecipientId()),
                 jpa.getDestination(), jpa.getSubject(), jpa.getTemplate(),
-                MessageStatus.valueOf(jpa.getStatus()), jpa.getCreatedAt(), jpa.getSentAt());
+                MessageStatus.valueOf(jpa.getStatus()), jpa.getCreatedAt(), jpa.getSentAt(), jpa.getAttempts(), jpa.getLastAttemptAt());
     }
 
     private PatientNoticeJpa toJpa(PatientNotice n) {

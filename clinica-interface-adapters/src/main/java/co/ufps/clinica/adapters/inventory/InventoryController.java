@@ -23,21 +23,29 @@ public final class InventoryController {
 
     public StockLotResponse createStockLot(CreateStockLotRequest request) {
         StockLot l = service.createStockLot(new CreateStockLotCommand(
-                BranchId.of(request.branchId()), MedicineId.of(request.medicineId()),
+                BranchId.of(java.util.UUID.fromString(request.branchId())), MedicineId.of(java.util.UUID.fromString(request.medicineId())),
                 request.lotNumber(), request.quantity(), request.expiresAt(), request.unitCost()));
         return presentStockLot(l);
     }
 
     public StockMovementResponse recordMovement(RecordMovementRequest request) {
         StockMovement m = service.recordMovement(new RecordMovementCommand(
-                StockLotId.of(request.lotId()), StockMovementType.valueOf(request.type()),
-                request.quantity(), request.reason(), UserId.of(request.actorId())));
+                StockLotId.of(java.util.UUID.fromString(request.lotId())), StockMovementType.valueOf(request.type()),
+                request.quantity(), request.reason(), UserId.of(java.util.UUID.fromString(request.actorId()))));
         return presentMovement(m);
+    }
+
+    public List<StockLotResponse> lowStock(String branchId) {
+        return service.belowMinimum(BranchId.of(java.util.UUID.fromString(branchId))).stream().map(this::presentStockLot).toList();
+    }
+    public List<StockLotResponse> expiringBefore(String branchId, java.time.LocalDate date) {
+        if (date == null) throw new IllegalArgumentException("La fecha límite es obligatoria");
+        return service.expiringBefore(BranchId.of(java.util.UUID.fromString(branchId)), date).stream().map(this::presentStockLot).toList();
     }
 
     private MedicineResponse presentMedicine(Medicine m) {
         return new MedicineResponse(m.id().value().toString(), m.name(), m.presentation(),
-                m.dosageForm(), m.unit(), m.isActive());
+                m.dosageForm(), m.unit(), m.active());
     }
 
     private StockLotResponse presentStockLot(StockLot l) {

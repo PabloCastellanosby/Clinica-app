@@ -14,8 +14,14 @@ public class StockLotJpa {
     private UUID id;
     @Column(name = "branch_id", nullable = false)
     private UUID branchId;
+    @jakarta.persistence.ManyToOne(fetch = jakarta.persistence.FetchType.LAZY)
+    @jakarta.persistence.JoinColumn(name = "branch_id", insertable = false, updatable = false, foreignKey = @jakarta.persistence.ForeignKey(name = "fk_stock_lots_branch"))
+    private co.ufps.clinica.frameworks.persistence.clinic.BranchJpa branchReference;
     @Column(name = "medicine_id", nullable = false)
     private UUID medicineId;
+    @jakarta.persistence.ManyToOne(fetch = jakarta.persistence.FetchType.LAZY)
+    @jakarta.persistence.JoinColumn(name = "medicine_id", insertable = false, updatable = false, foreignKey = @jakarta.persistence.ForeignKey(name = "fk_stock_lots_medicine"))
+    private co.ufps.clinica.frameworks.persistence.inventory.MedicineJpa medicineReference;
     @Column(name = "lot_number", length = 100, nullable = false)
     private String lotNumber;
     @Column(name = "quantity", nullable = false)

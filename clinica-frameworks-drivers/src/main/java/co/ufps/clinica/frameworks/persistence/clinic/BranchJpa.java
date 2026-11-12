@@ -10,6 +10,9 @@ public class BranchJpa {
     private UUID id;
     @Column(name = "clinic_id", nullable = false)
     private UUID clinicId;
+    @jakarta.persistence.ManyToOne(fetch = jakarta.persistence.FetchType.LAZY)
+    @jakarta.persistence.JoinColumn(name = "clinic_id", insertable = false, updatable = false, foreignKey = @jakarta.persistence.ForeignKey(name = "fk_branches_clinic"))
+    private co.ufps.clinica.frameworks.persistence.clinic.ClinicJpa clinicReference;
     @Column(name = "name", length = 200, nullable = false)
     private String name;
     @Column(name = "address", length = 500)

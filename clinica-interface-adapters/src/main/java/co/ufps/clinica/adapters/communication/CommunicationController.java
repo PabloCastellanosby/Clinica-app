@@ -13,22 +13,26 @@ public final class CommunicationController {
 
     public MessageResponse sendMessage(SendMessageRequest request) {
         TransactionalMessage m = service.sendMessage(new SendMessageCommand(
-                UserId.of(request.recipientId()), request.destination(), request.subject(), request.template()));
+                UserId.of(java.util.UUID.fromString(request.recipientId())), request.destination(), request.subject(), request.template()));
         return presentMessage(m);
     }
 
     public NoticeResponse publishNotice(PublishNoticeRequest request) {
         PatientNotice n = service.publishNotice(new PublishNoticeCommand(
-                request.title(), request.body(), request.expiresAt(), BranchId.of(request.branchId())));
+                request.title(), request.body(), request.expiresAt(), BranchId.of(java.util.UUID.fromString(request.branchId()))));
         return presentNotice(n);
     }
 
     public List<NoticeResponse> getActiveNotices(String branchId) {
-        return service.getActiveNotices(BranchId.of(branchId)).stream().map(this::presentNotice).toList();
+        return service.getActiveNotices(BranchId.of(java.util.UUID.fromString(branchId))).stream().map(this::presentNotice).toList();
     }
 
     public List<MessageResponse> getMessagesForUser(String userId) {
-        return service.getMessagesForUser(UserId.of(userId)).stream().map(this::presentMessage).toList();
+        return service.getMessagesForUser(UserId.of(java.util.UUID.fromString(userId))).stream().map(this::presentMessage).toList();
+    }
+
+    public List<MessageResponse> getMessagesForUser(UserId userId) {
+        return service.getMessagesForUser(userId).stream().map(this::presentMessage).toList();
     }
 
     private MessageResponse presentMessage(TransactionalMessage m) {

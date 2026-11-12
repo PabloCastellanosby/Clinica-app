@@ -6,10 +6,12 @@ import co.ufps.clinica.domain.identity.UserId;
 import co.ufps.clinica.application.port.out.inventory.InventoryRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
+import java.time.LocalDate;
 
 @ApplicationScoped
 public class InventoryRepositoryJpa implements InventoryRepository {
@@ -45,9 +47,39 @@ public class InventoryRepositoryJpa implements InventoryRepository {
                 .setParameter("mid", medicineId.value()).getResultList().stream().map(this::toDomainLot).toList();
     }
 
+    @Override public List<StockLot> findLotsBelowMinimum(BranchId branchId, int minimum) {
+        return entityManager.createQuery("SELECT l FROM StockLotJpa l WHERE l.branchId = :branchId AND l.quantity <= :minimum AND l.medicineId IN (SELECT m.id FROM MedicineJpa m WHERE m.active = true)", StockLotJpa.class)
+                .setParameter("branchId", branchId.value()).setParameter("minimum", minimum)
+                .getResultList().stream().map(this::toDomainLot).toList();
+    }
+
+    @Override public List<StockLot> findLotsExpiringBefore(BranchId branchId, LocalDate date) {
+        return entityManager.createQuery("SELECT l FROM StockLotJpa l WHERE l.branchId = :branchId AND l.expiresAt IS NOT NULL AND l.expiresAt <= :date AND l.medicineId IN (SELECT m.id FROM MedicineJpa m WHERE m.active = true)", StockLotJpa.class)
+                .setParameter("branchId", branchId.value()).setParameter("date", date)
+                .getResultList().stream().map(this::toDomainLot).toList();
+    }
+
     @Override @Transactional public StockMovement saveMovement(StockMovement movement) {
         entityManager.merge(toJpa(movement));
         return movement;
+    }
+
+    @Override @Transactional public StockLot applyMovement(StockMovement movement) {
+        StockLotJpa lot = entityManager.find(StockLotJpa.class, movement.lotId().value(), LockModeType.PESSIMISTIC_WRITE);
+        if (lot == null) throw new java.util.NoSuchElementException("Lote no encontrado");
+        if (movement.type() == StockMovementType.DISPENSATION && lot.getExpiresAt() != null
+                && lot.getExpiresAt().isBefore(LocalDate.now())) {
+            throw new IllegalStateException("No se puede dispensar un lote vencido");
+        }
+        int updatedQuantity = switch (movement.type()) {
+            case ENTRY -> Math.addExact(lot.getQuantity(), movement.quantity());
+            case EXIT, DISPENSATION -> Math.subtractExact(lot.getQuantity(), movement.quantity());
+            case ADJUSTMENT -> movement.quantity();
+        };
+        if (updatedQuantity < 0) throw new IllegalStateException("El movimiento dejaría existencias negativas");
+        lot.setQuantity(updatedQuantity);
+        entityManager.persist(toJpa(movement));
+        return toDomainLot(lot);
     }
 
     private MedicineJpa toJpa(Medicine m) {

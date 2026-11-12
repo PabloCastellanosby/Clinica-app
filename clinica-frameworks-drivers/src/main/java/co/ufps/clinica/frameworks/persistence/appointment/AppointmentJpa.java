@@ -18,14 +18,29 @@ public class AppointmentJpa {
     private UUID id;
     @Column(name = "patient_id", nullable = false)
     private UUID patientId;
+    @jakarta.persistence.ManyToOne(fetch = jakarta.persistence.FetchType.LAZY)
+    @jakarta.persistence.JoinColumn(name = "patient_id", insertable = false, updatable = false, foreignKey = @jakarta.persistence.ForeignKey(name = "fk_appointments_patient"))
+    private co.ufps.clinica.frameworks.persistence.patient.PatientJpa patientReference;
     @Column(name = "doctor_id", nullable = false)
     private UUID doctorId;
+    @jakarta.persistence.ManyToOne(fetch = jakarta.persistence.FetchType.LAZY)
+    @jakarta.persistence.JoinColumn(name = "doctor_id", insertable = false, updatable = false, foreignKey = @jakarta.persistence.ForeignKey(name = "fk_appointments_doctor"))
+    private co.ufps.clinica.frameworks.persistence.staff.DoctorJpa doctorReference;
     @Column(name = "branch_id", nullable = false)
     private UUID branchId;
+    @jakarta.persistence.ManyToOne(fetch = jakarta.persistence.FetchType.LAZY)
+    @jakarta.persistence.JoinColumn(name = "branch_id", insertable = false, updatable = false, foreignKey = @jakarta.persistence.ForeignKey(name = "fk_appointments_branch"))
+    private co.ufps.clinica.frameworks.persistence.clinic.BranchJpa branchReference;
     @Column(name = "office_id", nullable = false)
     private UUID officeId;
+    @jakarta.persistence.ManyToOne(fetch = jakarta.persistence.FetchType.LAZY)
+    @jakarta.persistence.JoinColumn(name = "office_id", insertable = false, updatable = false, foreignKey = @jakarta.persistence.ForeignKey(name = "fk_appointments_office"))
+    private co.ufps.clinica.frameworks.persistence.clinic.OfficeJpa officeReference;
     @Column(name = "service_id")
     private UUID serviceId;
+    @jakarta.persistence.ManyToOne(fetch = jakarta.persistence.FetchType.LAZY)
+    @jakarta.persistence.JoinColumn(name = "service_id", insertable = false, updatable = false, foreignKey = @jakarta.persistence.ForeignKey(name = "fk_appointments_service"))
+    private co.ufps.clinica.frameworks.persistence.catalog.ServiceJpa serviceReference;
     @Column(name = "starts_at", nullable = false)
     private Instant startsAt;
     @Column(name = "ends_at", nullable = false)

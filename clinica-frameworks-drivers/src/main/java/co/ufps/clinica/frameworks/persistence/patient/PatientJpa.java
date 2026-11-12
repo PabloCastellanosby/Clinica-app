@@ -35,6 +35,11 @@ public class PatientJpa {
     private String address;
     @Column(name = "affiliation_type", length = 80)
     private String affiliationType;
+    @Column(name = "user_id", unique = true)
+    private UUID userId;
+    @jakarta.persistence.ManyToOne(fetch = jakarta.persistence.FetchType.LAZY)
+    @jakarta.persistence.JoinColumn(name = "user_id", insertable = false, updatable = false, foreignKey = @jakarta.persistence.ForeignKey(name = "fk_patients_user"))
+    private co.ufps.clinica.frameworks.persistence.identity.UserJpa userReference;
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
@@ -59,6 +64,8 @@ public class PatientJpa {
     public void setAddress(String address) { this.address = address; }
     public String getAffiliationType() { return affiliationType; }
     public void setAffiliationType(String affiliationType) { this.affiliationType = affiliationType; }
+    public UUID getUserId() { return userId; }
+    public void setUserId(UUID userId) { this.userId = userId; }
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
 }

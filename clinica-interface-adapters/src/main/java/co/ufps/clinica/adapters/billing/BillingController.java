@@ -13,8 +13,8 @@ public final class BillingController {
 
     public InvoiceResponse createInvoice(CreateInvoiceRequest request) {
         var command = new CreateInvoiceCommand(
-                PatientId.of(request.patientId()),
-                AppointmentId.of(request.appointmentId()),
+                PatientId.of(java.util.UUID.fromString(request.patientId())),
+                AppointmentId.of(java.util.UUID.fromString(request.appointmentId())),
                 request.lines().stream().map(l -> new CreateInvoiceCommand.InvoiceLineDto(l.description(), l.quantity(), l.unitPrice())).toList(),
                 request.taxRate(), request.currency());
         Invoice invoice = invoiceService.createInvoice(command);
@@ -22,16 +22,17 @@ public final class BillingController {
     }
 
     public InvoiceResponse changeStatus(String id, String status) {
-        Invoice updated = invoiceService.changeStatus(InvoiceId.of(id), InvoiceStatus.valueOf(status));
+        Invoice updated = invoiceService.changeStatus(InvoiceId.of(java.util.UUID.fromString(id)), InvoiceStatus.valueOf(status));
         return present(updated);
     }
 
     public InvoiceResponse findById(String id) {
-        return invoiceService.findById(InvoiceId.of(id)).map(this::present).orElse(null);
+        return invoiceService.findById(InvoiceId.of(java.util.UUID.fromString(id))).map(this::present)
+                .orElseThrow(() -> new java.util.NoSuchElementException("Factura no encontrada"));
     }
 
     public List<InvoiceResponse> findByPatient(String patientId) {
-        return invoiceService.findByPatient(PatientId.of(patientId)).stream().map(this::present).toList();
+        return invoiceService.findByPatient(PatientId.of(java.util.UUID.fromString(patientId))).stream().map(this::present).toList();
     }
 
     private InvoiceResponse present(Invoice i) {

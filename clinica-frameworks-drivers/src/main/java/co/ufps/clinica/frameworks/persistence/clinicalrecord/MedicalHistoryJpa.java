@@ -11,6 +11,9 @@ public class MedicalHistoryJpa {
     private UUID id;
     @Column(name = "patient_id", nullable = false)
     private UUID patientId;
+    @jakarta.persistence.ManyToOne(fetch = jakarta.persistence.FetchType.LAZY)
+    @jakarta.persistence.JoinColumn(name = "patient_id", insertable = false, updatable = false, foreignKey = @jakarta.persistence.ForeignKey(name = "fk_medical_history_patient"))
+    private co.ufps.clinica.frameworks.persistence.patient.PatientJpa patientReference;
     @Column(name = "type", length = 100, nullable = false)
     private String type;
     @Column(name = "description", length = 5000)
@@ -20,6 +23,9 @@ public class MedicalHistoryJpa {
     @Column(name = "recorded_by", nullable = false)
     private UUID recordedBy;
 
+    @jakarta.persistence.ManyToOne(fetch = jakarta.persistence.FetchType.LAZY)
+    @jakarta.persistence.JoinColumn(name = "recorded_by", insertable = false, updatable = false, foreignKey = @jakarta.persistence.ForeignKey(name = "fk_medical_history_recorder"))
+    private co.ufps.clinica.frameworks.persistence.identity.UserJpa recorderReference;
     public MedicalHistoryJpa() {}
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }

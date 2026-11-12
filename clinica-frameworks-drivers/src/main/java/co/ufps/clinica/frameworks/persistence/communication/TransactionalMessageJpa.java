@@ -11,6 +11,9 @@ public class TransactionalMessageJpa {
     private UUID id;
     @Column(name = "recipient_id")
     private UUID recipientId;
+    @jakarta.persistence.ManyToOne(fetch = jakarta.persistence.FetchType.LAZY)
+    @jakarta.persistence.JoinColumn(name = "recipient_id", insertable = false, updatable = false, foreignKey = @jakarta.persistence.ForeignKey(name = "fk_transactional_messages_recipient"))
+    private co.ufps.clinica.frameworks.persistence.identity.UserJpa recipientReference;
     @Column(name = "destination", length = 254)
     private String destination;
     @Column(name = "subject", length = 500)
@@ -23,6 +26,10 @@ public class TransactionalMessageJpa {
     private Instant createdAt;
     @Column(name = "sent_at")
     private Instant sentAt;
+    @Column(name = "attempts", nullable = false)
+    private int attempts;
+    @Column(name = "last_attempt_at")
+    private Instant lastAttemptAt;
 
     public TransactionalMessageJpa() {}
     public UUID getId() { return id; }
@@ -41,4 +48,8 @@ public class TransactionalMessageJpa {
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
     public Instant getSentAt() { return sentAt; }
     public void setSentAt(Instant sentAt) { this.sentAt = sentAt; }
+    public int getAttempts() { return attempts; }
+    public void setAttempts(int attempts) { this.attempts = attempts; }
+    public Instant getLastAttemptAt() { return lastAttemptAt; }
+    public void setLastAttemptAt(Instant lastAttemptAt) { this.lastAttemptAt = lastAttemptAt; }
 }

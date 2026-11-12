@@ -14,8 +14,14 @@ public class InvoiceJpa {
     private UUID id;
     @Column(name = "patient_id", nullable = false)
     private UUID patientId;
+    @jakarta.persistence.ManyToOne(fetch = jakarta.persistence.FetchType.LAZY)
+    @jakarta.persistence.JoinColumn(name = "patient_id", insertable = false, updatable = false, foreignKey = @jakarta.persistence.ForeignKey(name = "fk_invoices_patient"))
+    private co.ufps.clinica.frameworks.persistence.patient.PatientJpa patientReference;
     @Column(name = "appointment_id")
     private UUID appointmentId;
+    @jakarta.persistence.ManyToOne(fetch = jakarta.persistence.FetchType.LAZY)
+    @jakarta.persistence.JoinColumn(name = "appointment_id", insertable = false, updatable = false, foreignKey = @jakarta.persistence.ForeignKey(name = "fk_invoices_appointment"))
+    private co.ufps.clinica.frameworks.persistence.appointment.AppointmentJpa appointmentReference;
     @Column(name = "number", length = 50, nullable = false, unique = true)
     private String number;
     @Column(name = "issued_at", nullable = false)

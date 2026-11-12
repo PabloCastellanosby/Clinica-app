@@ -58,6 +58,40 @@ public class ClinicRepositoryJpa implements ClinicRepository {
                 .setParameter("bid", branchId.value()).getResultList().stream().map(this::toDomainOffice).toList();
     }
 
+    @Override @Transactional public Holiday saveHoliday(Holiday holiday) {
+        HolidayJpa jpa = new HolidayJpa();
+        jpa.setId(holiday.id().value());
+        jpa.setBranchId(holiday.branchId().value());
+        jpa.setDate(holiday.date());
+        jpa.setDescription(holiday.description());
+        entityManager.persist(jpa);
+        return holiday;
+    }
+
+    @Override public List<Holiday> findHolidaysByBranch(BranchId branchId) {
+        return entityManager.createQuery("SELECT h FROM HolidayJpa h WHERE h.branchId = :branchId ORDER BY h.date", HolidayJpa.class)
+                .setParameter("branchId", branchId.value()).getResultList().stream()
+                .map(h -> new Holiday(HolidayId.of(h.getId()), BranchId.of(h.getBranchId()), h.getDate(), h.getDescription())).toList();
+    }
+
+    @Override @Transactional public OpeningHours saveOpeningHours(OpeningHours hours) {
+        OpeningHoursJpa jpa = new OpeningHoursJpa();
+        jpa.setId(hours.id().value());
+        jpa.setBranchId(hours.branchId().value());
+        jpa.setDay(hours.day().name());
+        jpa.setOpensAt(hours.opensAt());
+        jpa.setClosesAt(hours.closesAt());
+        entityManager.persist(jpa);
+        return hours;
+    }
+
+    @Override public List<OpeningHours> findOpeningHoursByBranch(BranchId branchId) {
+        return entityManager.createQuery("SELECT h FROM OpeningHoursJpa h WHERE h.branchId = :branchId ORDER BY h.day, h.opensAt", OpeningHoursJpa.class)
+                .setParameter("branchId", branchId.value()).getResultList().stream()
+                .map(h -> new OpeningHours(OpeningHoursId.of(h.getId()), BranchId.of(h.getBranchId()),
+                        java.time.DayOfWeek.valueOf(h.getDay()), h.getOpensAt(), h.getClosesAt())).toList();
+    }
+
     private ClinicJpa toJpa(Clinic c) {
         ClinicJpa jpa = new ClinicJpa();
         jpa.setId(c.id().value()); jpa.setName(c.name());

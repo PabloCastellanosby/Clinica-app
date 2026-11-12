@@ -13,14 +13,20 @@ public class DoctorJpa {
     private UUID id;
     @Column(name = "user_id", nullable = false, unique = true)
     private UUID userId;
+    @jakarta.persistence.ManyToOne(fetch = jakarta.persistence.FetchType.LAZY)
+    @jakarta.persistence.JoinColumn(name = "user_id", insertable = false, updatable = false, foreignKey = @jakarta.persistence.ForeignKey(name = "fk_doctors_user"))
+    private co.ufps.clinica.frameworks.persistence.identity.UserJpa userReference;
     @Column(name = "license_number", length = 50, nullable = false, unique = true)
     private String licenseNumber;
     @Column(name = "first_name", length = 120, nullable = false)
     private String firstName;
     @Column(name = "last_name", length = 120, nullable = false)
     private String lastName;
-    @Column(name = "specialty_id")
+    @Column(name = "specialty_id", nullable = false)
     private UUID specialtyId;
+    @jakarta.persistence.ManyToOne(fetch = jakarta.persistence.FetchType.LAZY)
+    @jakarta.persistence.JoinColumn(name = "specialty_id", insertable = false, updatable = false, foreignKey = @jakarta.persistence.ForeignKey(name = "fk_doctors_specialty"))
+    private co.ufps.clinica.frameworks.persistence.catalog.SpecialtyJpa specialtyReference;
     @Column(name = "status", length = 20, nullable = false)
     private String status;
 

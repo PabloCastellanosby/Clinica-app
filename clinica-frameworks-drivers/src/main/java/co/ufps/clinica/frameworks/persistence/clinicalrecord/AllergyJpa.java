@@ -10,6 +10,9 @@ public class AllergyJpa {
     private UUID id;
     @Column(name = "patient_id", nullable = false)
     private UUID patientId;
+    @jakarta.persistence.ManyToOne(fetch = jakarta.persistence.FetchType.LAZY)
+    @jakarta.persistence.JoinColumn(name = "patient_id", insertable = false, updatable = false, foreignKey = @jakarta.persistence.ForeignKey(name = "fk_allergies_patient"))
+    private co.ufps.clinica.frameworks.persistence.patient.PatientJpa patientReference;
     @Column(name = "substance", length = 200, nullable = false)
     private String substance;
     @Column(name = "reaction", length = 500)

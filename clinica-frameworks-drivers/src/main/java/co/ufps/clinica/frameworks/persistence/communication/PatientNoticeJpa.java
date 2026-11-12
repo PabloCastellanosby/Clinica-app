@@ -20,6 +20,9 @@ public class PatientNoticeJpa {
     @Column(name = "branch_id")
     private UUID branchId;
 
+    @jakarta.persistence.ManyToOne(fetch = jakarta.persistence.FetchType.LAZY)
+    @jakarta.persistence.JoinColumn(name = "branch_id", insertable = false, updatable = false, foreignKey = @jakarta.persistence.ForeignKey(name = "fk_patient_notices_branch"))
+    private co.ufps.clinica.frameworks.persistence.clinic.BranchJpa branchReference;
     public PatientNoticeJpa() {}
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }

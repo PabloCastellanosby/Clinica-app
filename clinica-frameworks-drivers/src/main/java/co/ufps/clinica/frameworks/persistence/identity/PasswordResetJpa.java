@@ -14,6 +14,9 @@ public class PasswordResetJpa {
     private UUID id;
     @Column(name = "user_id", nullable = false)
     private UUID userId;
+    @jakarta.persistence.ManyToOne(fetch = jakarta.persistence.FetchType.LAZY)
+    @jakarta.persistence.JoinColumn(name = "user_id", insertable = false, updatable = false, foreignKey = @jakarta.persistence.ForeignKey(name = "fk_password_resets_user"))
+    private co.ufps.clinica.frameworks.persistence.identity.UserJpa userReference;
     @Column(name = "token_hash", length = 500, nullable = false, unique = true)
     private String tokenHash;
     @Column(name = "expires_at", nullable = false)

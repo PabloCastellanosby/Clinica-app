@@ -8,8 +8,11 @@ import java.util.UUID;
 public class ServiceJpa {
     @Id @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
-    @Column(name = "specialty_id")
+    @Column(name = "specialty_id", nullable = false)
     private UUID specialtyId;
+    @jakarta.persistence.ManyToOne(fetch = jakarta.persistence.FetchType.LAZY)
+    @jakarta.persistence.JoinColumn(name = "specialty_id", insertable = false, updatable = false, foreignKey = @jakarta.persistence.ForeignKey(name = "fk_services_specialty"))
+    private co.ufps.clinica.frameworks.persistence.catalog.SpecialtyJpa specialtyReference;
     @Column(name = "name", length = 200, nullable = false)
     private String name;
     @Column(name = "description", length = 500)
